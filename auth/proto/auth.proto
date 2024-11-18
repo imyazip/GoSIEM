@@ -1,0 +1,114 @@
+syntax = "proto3";
+
+package auth;
+option go_package = "github.com/imyazip/GoSIEM/auth/;auth";
+
+// Сервис авторизации
+service AuthService {
+  // Генерация нового API-ключа
+  rpc GenerateKey (GenerateKeyRequest) returns (GenerateKeyResponse);
+  
+  // Проверка API-ключа и генерация JWT
+  rpc ValidateKey (ValidateKeyRequest) returns (ValidateKeyResponse);
+
+  // Регистрация нового пользователя
+  rpc RegisterUser (RegisterUserRequest) returns (RegisterResponse);
+
+  // Авторизация пользователя и генерация JWT
+  rpc Login (LoginRequest) returns (LoginResponse);
+}
+
+// Сервис разрешений
+service Persmissions {
+  //Запрос разрешений пользователя
+  rpc GetUserPermissions (GetUserPermissionsRequest) returns (GetUserPermissionsResponse);
+
+  //Запрос разрешений API - ключа
+  rpc GetKeyPermissions (GetKeyPermissionsRequest) returns (GetKeyPermissionsResponse);
+
+  //Обновить разрешения пользователя
+  rpc UpdateUserPermissions (UpdateUserPermissionsRequest) returns (UpdateUserPermissionsResponse);
+
+  //Обновить разрешения API - ключа
+  rpc UpdateKeyPermissions (UpdateKeyPermissionsRequest) returns (UpdateKeyPermissionsResponse);
+}
+
+// Запрос на генерацию API-ключа
+message GenerateKeyRequest {
+  string Token = 1; // JWT токен пользователя
+  string KeyName = 2; // Имя генерируемого API ключа
+}
+
+// Ответ с новым ключом
+message GenerateKeyResponse {
+  string key = 1; // Сгенерированный API-ключ
+}
+
+// Запрос на проверку API-ключа
+message ValidateKeyRequest {
+  string key = 1; // API-ключ для проверки
+}
+
+// Ответ на проверку API-ключа
+message ValidateKeyResponse {
+  bool valid = 1;    // Статус валидности ключа
+  string KeyName = 2; // Имя ключа
+  string token = 3;    // JWT токен, если ключ валиден
+}
+
+message RegisterUserRequest {
+  string Jwt = 1; // Токен, обладающий правами регистрации пользователей
+  string Username = 2; // Имя регистрируемого пользователя
+  string Password = 3; // Пароль регистрируемого пользователя
+}
+
+message RegisterResponse {
+  int64 user_id = 1; // UserId
+}
+
+message LoginRequest {
+  string Username = 1; // Имя пользователя
+  string Password = 2; // Пароль пользователя
+}
+
+message LoginResponse{
+  string JWT = 1; // JWT токен авторизованного пользователя
+}
+
+message GetUserPermissionsRequest{
+  string user_id = 1; // UserId запрашиваемого пользователя
+  string JWT = 2; 
+}
+
+message GetUserPermissionsResponse{
+  repeated string UserPermissions = 1; //Разрешения пользователя
+}
+
+message GetKeyPermissionsRequest{
+  string Key = 1; // API ключ, разрешения которого запрашиваем
+  string JWT = 2;
+}
+
+message GetKeyPermissionsResponse{
+  repeated string UserPermissions = 1; //Разрешения API ключа
+}
+
+message UpdateUserPermissionsRequest{
+  string user_id = 1; // UserId запрашиваемого пользователя
+  string JWT = 2; 
+  repeated string Permissions = 3; // Обновленные разрешения
+}
+
+message UpdateUserPermissionsResponse{
+  string Error = 1; // Сообщение в случае ошибки 
+}
+
+message UpdateKeyPermissionsRequest{
+  string Key = 1; // API ключ
+  string JWT = 2; 
+  repeated string Permissions = 3; // Обновленные разрешения
+}
+
+message UpdateKeyPermissionsResponse{
+  string Error = 1; // Сообщение в случае ошибки 
+}
