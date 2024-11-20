@@ -1,0 +1,14 @@
+database:
+  host: mysql  # Имя сервиса в Docker Compose
+  port: 3306
+  user: auth_user
+  password: auth_password
+  name: auth_db
+
+server:
+  host: "0.0.0.0"
+  port: 50051
+
+jwt:
+  secretKey: "your-secret-key"
+  expirationMinutes: 60

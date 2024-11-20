@@ -5,19 +5,21 @@ option go_package = "github.com/imyazip/GoSIEM/auth/;auth";
 
 // Сервис авторизации
 service AuthService {
+  /*
   // Генерация нового API-ключа
   rpc GenerateKey (GenerateKeyRequest) returns (GenerateKeyResponse);
-  
+  */
   // Проверка API-ключа и генерация JWT
   rpc ValidateKey (ValidateKeyRequest) returns (ValidateKeyResponse);
-
+/*
   // Регистрация нового пользователя
   rpc RegisterUser (RegisterUserRequest) returns (RegisterResponse);
 
   // Авторизация пользователя и генерация JWT
   rpc Login (LoginRequest) returns (LoginResponse);
+  */
 }
-
+/*
 // Сервис разрешений
 service Persmissions {
   //Запрос разрешений пользователя
@@ -43,32 +45,33 @@ message GenerateKeyRequest {
 message GenerateKeyResponse {
   string key = 1; // Сгенерированный API-ключ
 }
-
+*/
 // Запрос на проверку API-ключа
 message ValidateKeyRequest {
   string key = 1; // API-ключ для проверки
 }
 
-// Ответ на проверку API-ключа
+
 message ValidateKeyResponse {
-  bool valid = 1;    // Статус валидности ключа
-  string KeyName = 2; // Имя ключа
-  string token = 3;    // JWT токен, если ключ валиден
+
+  string token = 1;    // JWT токен, если ключ валиден
 }
 
+/*
 message RegisterUserRequest {
-  string Jwt = 1; // Токен, обладающий правами регистрации пользователей
+  string JWT = 1; // Токен, обладающий правами регистрации пользователей
   string Username = 2; // Имя регистрируемого пользователя
   string Password = 3; // Пароль регистрируемого пользователя
 }
 
 message RegisterResponse {
-  int64 user_id = 1; // UserId
+  int64 userID = 1; // UserId
 }
 
 message LoginRequest {
   string Username = 1; // Имя пользователя
   string Password = 2; // Пароль пользователя
+  uint32 appID = 3; // ID приложения 
 }
 
 message LoginResponse{
@@ -112,3 +115,5 @@ message UpdateKeyPermissionsRequest{
 message UpdateKeyPermissionsResponse{
   string Error = 1; // Сообщение в случае ошибки 
 }
+
+*/

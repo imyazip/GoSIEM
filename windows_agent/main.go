@@ -1,15 +1,26 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"log"
 
 	"github.com/go-ole/go-ole"
+	pb "github.com/imyazip/GoSIEM/windows_agent/proto"
+	"google.golang.org/grpc"
 )
 
 func main() {
+	apiKey := "your-api-key"
+	token, err := getToken(apiKey)
+	if err != nil {
+		log.Fatalf("Failed to get token: %v", err)
+	}
+
+	// Выводим полученный токен
+	fmt.Printf("Received token: %s\n", token)
 	// Инициализация OLE
-	err := ole.CoInitializeEx(0, ole.COINIT_MULTITHREADED)
+	err = ole.CoInitializeEx(0, ole.COINIT_MULTITHREADED)
 	if err != nil {
 		log.Fatalf("Failed to initialize OLE: %v\n", err)
 	}
@@ -61,4 +72,30 @@ func main() {
 	}()
 
 	select {}
+}
+
+// Функция для получения токена
+func getToken(apiKey string) (string, error) {
+	// Создаем соединение с gRPC сервером
+	conn, err := grpc.Dial("localhost:50051", grpc.WithInsecure()) // Замените на актуальный адрес
+	if err != nil {
+		return "", fmt.Errorf("did not connect: %v", err)
+	}
+	defer conn.Close()
+
+	// Создаем клиент для сервиса
+	client := pb.NewAuthServiceClient(conn)
+
+	// Создаем запрос с API-ключом
+	req := &pb.ValidateKeyRequest{
+		Key: apiKey,
+	}
+
+	// Отправляем запрос и получаем ответ
+	res, err := client.ValidateKey(context.Background(), req)
+	if err != nil {
+		return "", fmt.Errorf("error during request: %v", err)
+	}
+
+	return res.Token, nil
 }
