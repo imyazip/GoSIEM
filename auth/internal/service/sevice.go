@@ -9,7 +9,9 @@ import (
 
 	"github.com/imyazip/GoSIEM/auth/internal/storage"
 	"github.com/imyazip/GoSIEM/auth/pkg/config"
+	"github.com/imyazip/GoSIEM/auth/pkg/hash"
 	"github.com/imyazip/GoSIEM/auth/pkg/jwt"
+	"google.golang.org/grpc/metadata"
 )
 
 // AuthService представляет собой основной сервис для аутентификации и авторизации.
@@ -41,4 +43,43 @@ func (s *AuthService) GenerateJWTFromAPIKey(ctx context.Context, apiKey string) 
 
 	expirationTime := time.Now().Add(time.Duration(s.config.JWT.ExpirationMinutes) * time.Minute)
 	return jwt.GenerateJWT(s.config.JWT.SecretKey, apiKey, expirationTime)
+}
+
+func (s *AuthService) CreateNewUser(ctx context.Context, username string, password string, roleID int64) error {
+	// Извлекаем метаданные из контекста для проверки jwt токена
+	md, ok := metadata.FromIncomingContext(ctx)
+	if !ok {
+		log.Printf("failed to get metadata")
+		return errors.New("failed to get metadata")
+	}
+
+	// Извлекаем токен из метаданных
+	authHeader := md["authorization"]
+	if len(authHeader) == 0 {
+		log.Printf("missing authorization token")
+		return errors.New("missing authorization token")
+	}
+
+	// Токен должен быть в формате "Bearer <token>"
+	token := authHeader[0][7:] // Убираем "Bearer " из строки
+
+	// Проверяем валидность токена
+	valid, role, err := jwt.ValidateUserJWT(token, s.config.JWT.SecretKey)
+	if err != nil || !valid || role != "admin" {
+		return errors.New("invalid or insufficient token")
+	}
+
+	hashedPassword, err := hash.HashPassword(password)
+	if err != nil {
+		return errors.New("failed hashing password")
+	}
+
+	err = s.db.InsertUser(ctx, username, hashedPassword, roleID)
+	if err != nil {
+		return errors.New("failed inserting user to database")
+	}
+
+	log.Printf("Added user %s with roleID %d to database", username, roleID)
+	return nil
+
 }

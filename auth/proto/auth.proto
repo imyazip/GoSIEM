@@ -82,7 +82,7 @@ string role = 3;    // Роль пользователя
 message CreateUserRequest {
 string username = 1;
 string password = 2;
-string role = 3; // Роль нового пользователя ("admin", "analyst", "viewer")
+int64 role = 3; // Роль нового пользователя ("admin", "analyst", "viewer")
 }
 
 // Ответ на создание пользователя

@@ -3,7 +3,7 @@ package hash
 import "golang.org/x/crypto/bcrypt"
 
 // Функция для хеширования пароля
-func hashPassword(password string) (string, error) {
+func HashPassword(password string) (string, error) {
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	if err != nil {
 		return "", err
