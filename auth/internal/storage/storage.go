@@ -4,6 +4,11 @@ package storage
 import (
 	"context"
 	"database/sql"
+	"errors"
+	"fmt"
+	"log"
+
+	"github.com/imyazip/GoSIEM/auth/internal/models"
 )
 
 type Storage struct {
@@ -50,11 +55,53 @@ func (s *Storage) UserExists(ctx context.Context, userName string) (bool, error)
 
 // InsertUser добавляет нового пользователя в БД,
 // Возвращает err в случае неудачи, nil при успешном добавлении
-func (s *Storage) InsertUser(ctx context.Context, userName string, hashedPassword string, roleID int) error {
+func (s *Storage) InsertUser(ctx context.Context, userName string, hashedPassword string, roleID int64) error {
 	_, err := s.db.ExecContext(ctx, "INSERT INTO users (username, password, role_id) VALUES (?, ?, ?)", userName, hashedPassword, roleID)
 	if err != nil {
 		return err
 	}
 
 	return nil
+}
+
+func (s *Storage) GetUserByUsername(ctx context.Context, userName string) (*models.User, error) {
+	query := `
+        SELECT id, username, password, role_id, created_at, updated_at 
+        FROM users 
+        WHERE username = ?;
+    `
+	row := s.db.QueryRowContext(ctx, query, userName)
+
+	user := &models.User{}
+
+	err := row.Scan(&user.ID, &user.Username, &user.Password, &user.RoleID, &user.CreatedAt, &user.UpdatedAt)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			log.Printf("Пользователь с username '%s' не найден", userName)
+			return nil, err
+		}
+		log.Printf("Ошибка выполнения запроса для пользователя '%s': %v", userName, err)
+		return nil, err
+	}
+
+	return user, nil
+}
+
+// GetRoleNameByID возвращает имя роли по её ID.
+func (s *Storage) GetRoleNameByID(ctx context.Context, roleID int64) (string, error) {
+	var roleName string
+
+	// SQL-запрос для получения имени роли
+	query := "SELECT role_name FROM roles WHERE id = ?"
+
+	// Выполнение запроса с передачей roleID
+	err := s.db.QueryRowContext(ctx, query, roleID).Scan(&roleName)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return "", fmt.Errorf("role with ID %d not found", roleID)
+		}
+		return "", fmt.Errorf("failed to query role name: %w", err)
+	}
+
+	return roleName, nil
 }

@@ -3,7 +3,6 @@ package server
 
 import (
 	"context"
-	"log"
 
 	auth "github.com/imyazip/GoSIEM/auth/internal/service"
 	pb "github.com/imyazip/GoSIEM/auth/proto"
@@ -35,8 +34,8 @@ func (h *AuthAPI) GenerateJWTForSensor(ctx context.Context, req *pb.GenerateJWTF
 
 func (h *AuthAPI) CreateUser(ctx context.Context, req *pb.CreateUserRequest) (*pb.CreateUserResponse, error) {
 	err := h.service.CreateNewUser(ctx, req.Username, req.Password, req.Role)
-	log.Printf(err.Error())
 	if err != nil {
+		println(err)
 		return &pb.CreateUserResponse{
 			Success: false,
 		}, err
@@ -44,6 +43,19 @@ func (h *AuthAPI) CreateUser(ctx context.Context, req *pb.CreateUserRequest) (*p
 
 	return &pb.CreateUserResponse{
 		Success: true,
+	}, nil
+
+}
+
+func (h *AuthAPI) Login(ctx context.Context, req *pb.LoginRequest) (*pb.LoginResponse, error) {
+	token, err := h.service.GenerateJWTFromUser(ctx, req.Username, req.Password)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &pb.LoginResponse{
+		Token: token,
 	}, nil
 
 }

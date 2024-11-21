@@ -42,7 +42,7 @@ func (s *AuthService) GenerateJWTFromAPIKey(ctx context.Context, apiKey string) 
 	}
 
 	expirationTime := time.Now().Add(time.Duration(s.config.JWT.ExpirationMinutes) * time.Minute)
-	return jwt.GenerateJWT(s.config.JWT.SecretKey, apiKey, expirationTime)
+	return jwt.GenerateAPIJWT(s.config.JWT.SecretKey, apiKey, expirationTime)
 }
 
 func (s *AuthService) CreateNewUser(ctx context.Context, username string, password string, roleID int64) error {
@@ -81,5 +81,30 @@ func (s *AuthService) CreateNewUser(ctx context.Context, username string, passwo
 
 	log.Printf("Added user %s with roleID %d to database", username, roleID)
 	return nil
+
+}
+
+func (s *AuthService) GenerateJWTFromUser(ctx context.Context, username string, password string) (string, error) {
+	user, err := s.db.GetUserByUsername(ctx, username)
+	if err != nil {
+		return "", err
+	}
+
+	err = hash.ComparePasswordHash(user.Password, password)
+	if err != nil {
+		return "", err
+	}
+
+	role, err := s.db.GetRoleNameByID(ctx, user.RoleID)
+	if err != nil {
+		return "", err
+	}
+
+	expirationTime := time.Now().Add(time.Duration(s.config.JWT.ExpirationMinutes) * time.Minute)
+	token, err := jwt.GenerateUserJWT(s.config.JWT.SecretKey, user.ID, user.Username, role, expirationTime)
+	if err != nil {
+		return "", err
+	}
+	return token, nil
 
 }
