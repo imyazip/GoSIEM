@@ -19,7 +19,16 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	AuthService_ValidateKey_FullMethodName = "/auth.AuthService/ValidateKey"
+	AuthService_ValidateAPIKey_FullMethodName       = "/auth.AuthService/ValidateAPIKey"
+	AuthService_GenerateJWTForSensor_FullMethodName = "/auth.AuthService/GenerateJWTForSensor"
+	AuthService_Login_FullMethodName                = "/auth.AuthService/Login"
+	AuthService_ValidateJWT_FullMethodName          = "/auth.AuthService/ValidateJWT"
+	AuthService_CreateUser_FullMethodName           = "/auth.AuthService/CreateUser"
+	AuthService_DeleteUser_FullMethodName           = "/auth.AuthService/DeleteUser"
+	AuthService_GetUserRole_FullMethodName          = "/auth.AuthService/GetUserRole"
+	AuthService_SetUserRole_FullMethodName          = "/auth.AuthService/SetUserRole"
+	AuthService_GenerateAPIKey_FullMethodName       = "/auth.AuthService/GenerateAPIKey"
+	AuthService_RevokeAPIKey_FullMethodName         = "/auth.AuthService/RevokeAPIKey"
 )
 
 // AuthServiceClient is the client API for AuthService service.
@@ -28,8 +37,21 @@ const (
 //
 // Сервис авторизации
 type AuthServiceClient interface {
-	// Проверка API-ключа и генерация JWT
-	ValidateKey(ctx context.Context, in *ValidateKeyRequest, opts ...grpc.CallOption) (*ValidateKeyResponse, error)
+	// API для сенсоров
+	ValidateAPIKey(ctx context.Context, in *ValidateAPIKeyRequest, opts ...grpc.CallOption) (*ValidateAPIKeyResponse, error)
+	GenerateJWTForSensor(ctx context.Context, in *GenerateJWTForSensorRequest, opts ...grpc.CallOption) (*GenerateJWTForSensorResponse, error)
+	// API для пользователей
+	Login(ctx context.Context, in *LoginRequest, opts ...grpc.CallOption) (*LoginResponse, error)
+	ValidateJWT(ctx context.Context, in *ValidateJWTRequest, opts ...grpc.CallOption) (*ValidateJWTResponse, error)
+	// Управление пользователями
+	CreateUser(ctx context.Context, in *CreateUserRequest, opts ...grpc.CallOption) (*CreateUserResponse, error)
+	DeleteUser(ctx context.Context, in *DeleteUserRequest, opts ...grpc.CallOption) (*DeleteUserResponse, error)
+	// Управление ролями
+	GetUserRole(ctx context.Context, in *GetUserRoleRequest, opts ...grpc.CallOption) (*GetUserRoleResponse, error)
+	SetUserRole(ctx context.Context, in *SetUserRoleRequest, opts ...grpc.CallOption) (*SetUserRoleResponse, error)
+	// Управление API-ключами
+	GenerateAPIKey(ctx context.Context, in *GenerateAPIKeyRequest, opts ...grpc.CallOption) (*GenerateAPIKeyResponse, error)
+	RevokeAPIKey(ctx context.Context, in *RevokeAPIKeyRequest, opts ...grpc.CallOption) (*RevokeAPIKeyResponse, error)
 }
 
 type authServiceClient struct {
@@ -40,10 +62,100 @@ func NewAuthServiceClient(cc grpc.ClientConnInterface) AuthServiceClient {
 	return &authServiceClient{cc}
 }
 
-func (c *authServiceClient) ValidateKey(ctx context.Context, in *ValidateKeyRequest, opts ...grpc.CallOption) (*ValidateKeyResponse, error) {
+func (c *authServiceClient) ValidateAPIKey(ctx context.Context, in *ValidateAPIKeyRequest, opts ...grpc.CallOption) (*ValidateAPIKeyResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(ValidateKeyResponse)
-	err := c.cc.Invoke(ctx, AuthService_ValidateKey_FullMethodName, in, out, cOpts...)
+	out := new(ValidateAPIKeyResponse)
+	err := c.cc.Invoke(ctx, AuthService_ValidateAPIKey_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *authServiceClient) GenerateJWTForSensor(ctx context.Context, in *GenerateJWTForSensorRequest, opts ...grpc.CallOption) (*GenerateJWTForSensorResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GenerateJWTForSensorResponse)
+	err := c.cc.Invoke(ctx, AuthService_GenerateJWTForSensor_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *authServiceClient) Login(ctx context.Context, in *LoginRequest, opts ...grpc.CallOption) (*LoginResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(LoginResponse)
+	err := c.cc.Invoke(ctx, AuthService_Login_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *authServiceClient) ValidateJWT(ctx context.Context, in *ValidateJWTRequest, opts ...grpc.CallOption) (*ValidateJWTResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ValidateJWTResponse)
+	err := c.cc.Invoke(ctx, AuthService_ValidateJWT_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *authServiceClient) CreateUser(ctx context.Context, in *CreateUserRequest, opts ...grpc.CallOption) (*CreateUserResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(CreateUserResponse)
+	err := c.cc.Invoke(ctx, AuthService_CreateUser_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *authServiceClient) DeleteUser(ctx context.Context, in *DeleteUserRequest, opts ...grpc.CallOption) (*DeleteUserResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(DeleteUserResponse)
+	err := c.cc.Invoke(ctx, AuthService_DeleteUser_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *authServiceClient) GetUserRole(ctx context.Context, in *GetUserRoleRequest, opts ...grpc.CallOption) (*GetUserRoleResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetUserRoleResponse)
+	err := c.cc.Invoke(ctx, AuthService_GetUserRole_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *authServiceClient) SetUserRole(ctx context.Context, in *SetUserRoleRequest, opts ...grpc.CallOption) (*SetUserRoleResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(SetUserRoleResponse)
+	err := c.cc.Invoke(ctx, AuthService_SetUserRole_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *authServiceClient) GenerateAPIKey(ctx context.Context, in *GenerateAPIKeyRequest, opts ...grpc.CallOption) (*GenerateAPIKeyResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GenerateAPIKeyResponse)
+	err := c.cc.Invoke(ctx, AuthService_GenerateAPIKey_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *authServiceClient) RevokeAPIKey(ctx context.Context, in *RevokeAPIKeyRequest, opts ...grpc.CallOption) (*RevokeAPIKeyResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(RevokeAPIKeyResponse)
+	err := c.cc.Invoke(ctx, AuthService_RevokeAPIKey_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -56,8 +168,21 @@ func (c *authServiceClient) ValidateKey(ctx context.Context, in *ValidateKeyRequ
 //
 // Сервис авторизации
 type AuthServiceServer interface {
-	// Проверка API-ключа и генерация JWT
-	ValidateKey(context.Context, *ValidateKeyRequest) (*ValidateKeyResponse, error)
+	// API для сенсоров
+	ValidateAPIKey(context.Context, *ValidateAPIKeyRequest) (*ValidateAPIKeyResponse, error)
+	GenerateJWTForSensor(context.Context, *GenerateJWTForSensorRequest) (*GenerateJWTForSensorResponse, error)
+	// API для пользователей
+	Login(context.Context, *LoginRequest) (*LoginResponse, error)
+	ValidateJWT(context.Context, *ValidateJWTRequest) (*ValidateJWTResponse, error)
+	// Управление пользователями
+	CreateUser(context.Context, *CreateUserRequest) (*CreateUserResponse, error)
+	DeleteUser(context.Context, *DeleteUserRequest) (*DeleteUserResponse, error)
+	// Управление ролями
+	GetUserRole(context.Context, *GetUserRoleRequest) (*GetUserRoleResponse, error)
+	SetUserRole(context.Context, *SetUserRoleRequest) (*SetUserRoleResponse, error)
+	// Управление API-ключами
+	GenerateAPIKey(context.Context, *GenerateAPIKeyRequest) (*GenerateAPIKeyResponse, error)
+	RevokeAPIKey(context.Context, *RevokeAPIKeyRequest) (*RevokeAPIKeyResponse, error)
 	mustEmbedUnimplementedAuthServiceServer()
 }
 
@@ -68,8 +193,35 @@ type AuthServiceServer interface {
 // pointer dereference when methods are called.
 type UnimplementedAuthServiceServer struct{}
 
-func (UnimplementedAuthServiceServer) ValidateKey(context.Context, *ValidateKeyRequest) (*ValidateKeyResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method ValidateKey not implemented")
+func (UnimplementedAuthServiceServer) ValidateAPIKey(context.Context, *ValidateAPIKeyRequest) (*ValidateAPIKeyResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ValidateAPIKey not implemented")
+}
+func (UnimplementedAuthServiceServer) GenerateJWTForSensor(context.Context, *GenerateJWTForSensorRequest) (*GenerateJWTForSensorResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GenerateJWTForSensor not implemented")
+}
+func (UnimplementedAuthServiceServer) Login(context.Context, *LoginRequest) (*LoginResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Login not implemented")
+}
+func (UnimplementedAuthServiceServer) ValidateJWT(context.Context, *ValidateJWTRequest) (*ValidateJWTResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ValidateJWT not implemented")
+}
+func (UnimplementedAuthServiceServer) CreateUser(context.Context, *CreateUserRequest) (*CreateUserResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CreateUser not implemented")
+}
+func (UnimplementedAuthServiceServer) DeleteUser(context.Context, *DeleteUserRequest) (*DeleteUserResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeleteUser not implemented")
+}
+func (UnimplementedAuthServiceServer) GetUserRole(context.Context, *GetUserRoleRequest) (*GetUserRoleResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetUserRole not implemented")
+}
+func (UnimplementedAuthServiceServer) SetUserRole(context.Context, *SetUserRoleRequest) (*SetUserRoleResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method SetUserRole not implemented")
+}
+func (UnimplementedAuthServiceServer) GenerateAPIKey(context.Context, *GenerateAPIKeyRequest) (*GenerateAPIKeyResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GenerateAPIKey not implemented")
+}
+func (UnimplementedAuthServiceServer) RevokeAPIKey(context.Context, *RevokeAPIKeyRequest) (*RevokeAPIKeyResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method RevokeAPIKey not implemented")
 }
 func (UnimplementedAuthServiceServer) mustEmbedUnimplementedAuthServiceServer() {}
 func (UnimplementedAuthServiceServer) testEmbeddedByValue()                     {}
@@ -92,20 +244,182 @@ func RegisterAuthServiceServer(s grpc.ServiceRegistrar, srv AuthServiceServer) {
 	s.RegisterService(&AuthService_ServiceDesc, srv)
 }
 
-func _AuthService_ValidateKey_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ValidateKeyRequest)
+func _AuthService_ValidateAPIKey_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ValidateAPIKeyRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(AuthServiceServer).ValidateKey(ctx, in)
+		return srv.(AuthServiceServer).ValidateAPIKey(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: AuthService_ValidateKey_FullMethodName,
+		FullMethod: AuthService_ValidateAPIKey_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(AuthServiceServer).ValidateKey(ctx, req.(*ValidateKeyRequest))
+		return srv.(AuthServiceServer).ValidateAPIKey(ctx, req.(*ValidateAPIKeyRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _AuthService_GenerateJWTForSensor_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GenerateJWTForSensorRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AuthServiceServer).GenerateJWTForSensor(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: AuthService_GenerateJWTForSensor_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AuthServiceServer).GenerateJWTForSensor(ctx, req.(*GenerateJWTForSensorRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _AuthService_Login_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(LoginRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AuthServiceServer).Login(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: AuthService_Login_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AuthServiceServer).Login(ctx, req.(*LoginRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _AuthService_ValidateJWT_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ValidateJWTRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AuthServiceServer).ValidateJWT(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: AuthService_ValidateJWT_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AuthServiceServer).ValidateJWT(ctx, req.(*ValidateJWTRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _AuthService_CreateUser_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreateUserRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AuthServiceServer).CreateUser(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: AuthService_CreateUser_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AuthServiceServer).CreateUser(ctx, req.(*CreateUserRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _AuthService_DeleteUser_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeleteUserRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AuthServiceServer).DeleteUser(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: AuthService_DeleteUser_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AuthServiceServer).DeleteUser(ctx, req.(*DeleteUserRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _AuthService_GetUserRole_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetUserRoleRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AuthServiceServer).GetUserRole(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: AuthService_GetUserRole_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AuthServiceServer).GetUserRole(ctx, req.(*GetUserRoleRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _AuthService_SetUserRole_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SetUserRoleRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AuthServiceServer).SetUserRole(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: AuthService_SetUserRole_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AuthServiceServer).SetUserRole(ctx, req.(*SetUserRoleRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _AuthService_GenerateAPIKey_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GenerateAPIKeyRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AuthServiceServer).GenerateAPIKey(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: AuthService_GenerateAPIKey_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AuthServiceServer).GenerateAPIKey(ctx, req.(*GenerateAPIKeyRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _AuthService_RevokeAPIKey_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(RevokeAPIKeyRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AuthServiceServer).RevokeAPIKey(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: AuthService_RevokeAPIKey_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AuthServiceServer).RevokeAPIKey(ctx, req.(*RevokeAPIKeyRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -118,8 +432,44 @@ var AuthService_ServiceDesc = grpc.ServiceDesc{
 	HandlerType: (*AuthServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "ValidateKey",
-			Handler:    _AuthService_ValidateKey_Handler,
+			MethodName: "ValidateAPIKey",
+			Handler:    _AuthService_ValidateAPIKey_Handler,
+		},
+		{
+			MethodName: "GenerateJWTForSensor",
+			Handler:    _AuthService_GenerateJWTForSensor_Handler,
+		},
+		{
+			MethodName: "Login",
+			Handler:    _AuthService_Login_Handler,
+		},
+		{
+			MethodName: "ValidateJWT",
+			Handler:    _AuthService_ValidateJWT_Handler,
+		},
+		{
+			MethodName: "CreateUser",
+			Handler:    _AuthService_CreateUser_Handler,
+		},
+		{
+			MethodName: "DeleteUser",
+			Handler:    _AuthService_DeleteUser_Handler,
+		},
+		{
+			MethodName: "GetUserRole",
+			Handler:    _AuthService_GetUserRole_Handler,
+		},
+		{
+			MethodName: "SetUserRole",
+			Handler:    _AuthService_SetUserRole_Handler,
+		},
+		{
+			MethodName: "GenerateAPIKey",
+			Handler:    _AuthService_GenerateAPIKey_Handler,
+		},
+		{
+			MethodName: "RevokeAPIKey",
+			Handler:    _AuthService_RevokeAPIKey_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

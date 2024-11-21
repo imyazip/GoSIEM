@@ -5,4 +5,4 @@ CREATE TABLE IF NOT EXISTS auth_db.api_keys (
     key_value VARCHAR(255) NOT NULL UNIQUE
 );
 
-
+INSERT INTO auth_db.api_keys (key_value) VALUES ('your-api-key');

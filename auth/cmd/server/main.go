@@ -35,7 +35,7 @@ func main() {
 
 	authService := *auth.NewAuthService(*storage, cfg)
 
-	authHandler := handler.NewAuthHandler(&authService)
+	authHandler := handler.NewAuthAPI(&authService)
 
 	address := fmt.Sprintf("%s:%d", cfg.Server.Host, cfg.Server.Port)
 

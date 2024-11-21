@@ -5,115 +5,146 @@ option go_package = "github.com/imyazip/GoSIEM/auth/;auth";
 
 // Сервис авторизации
 service AuthService {
-  /*
-  // Генерация нового API-ключа
-  rpc GenerateKey (GenerateKeyRequest) returns (GenerateKeyResponse);
-  */
-  // Проверка API-ключа и генерация JWT
-  rpc ValidateKey (ValidateKeyRequest) returns (ValidateKeyResponse);
-/*
-  // Регистрация нового пользователя
-  rpc RegisterUser (RegisterUserRequest) returns (RegisterResponse);
+// API для сенсоров
+rpc ValidateAPIKey (ValidateAPIKeyRequest) returns (ValidateAPIKeyResponse);
+rpc GenerateJWTForSensor (GenerateJWTForSensorRequest) returns (GenerateJWTForSensorResponse);
 
-  // Авторизация пользователя и генерация JWT
-  rpc Login (LoginRequest) returns (LoginResponse);
-  */
-}
-/*
-// Сервис разрешений
-service Persmissions {
-  //Запрос разрешений пользователя
-  rpc GetUserPermissions (GetUserPermissionsRequest) returns (GetUserPermissionsResponse);
+// API для пользователей
+rpc Login (LoginRequest) returns (LoginResponse);
+rpc ValidateJWT (ValidateJWTRequest) returns (ValidateJWTResponse);
 
-  //Запрос разрешений API - ключа
-  rpc GetKeyPermissions (GetKeyPermissionsRequest) returns (GetKeyPermissionsResponse);
+// Управление пользователями
+rpc CreateUser (CreateUserRequest) returns (CreateUserResponse);
+rpc DeleteUser (DeleteUserRequest) returns (DeleteUserResponse);
 
-  //Обновить разрешения пользователя
-  rpc UpdateUserPermissions (UpdateUserPermissionsRequest) returns (UpdateUserPermissionsResponse);
+// Управление ролями
+rpc GetUserRole (GetUserRoleRequest) returns (GetUserRoleResponse);
+rpc SetUserRole (SetUserRoleRequest) returns (SetUserRoleResponse);
 
-  //Обновить разрешения API - ключа
-  rpc UpdateKeyPermissions (UpdateKeyPermissionsRequest) returns (UpdateKeyPermissionsResponse);
+// Управление API-ключами
+rpc GenerateAPIKey (GenerateAPIKeyRequest) returns (GenerateAPIKeyResponse);
+rpc RevokeAPIKey (RevokeAPIKeyRequest) returns (RevokeAPIKeyResponse);
 }
 
-// Запрос на генерацию API-ключа
-message GenerateKeyRequest {
-  string Token = 1; // JWT токен пользователя
-  string KeyName = 2; // Имя генерируемого API ключа
+/////////////////////////
+// Запросы и ответы
+/////////////////////////
+
+// Запрос для проверки API-ключа
+message ValidateAPIKeyRequest {
+string api_key = 1;
 }
 
-// Ответ с новым ключом
-message GenerateKeyResponse {
-  string key = 1; // Сгенерированный API-ключ
-}
-*/
-// Запрос на проверку API-ключа
-message ValidateKeyRequest {
-  string key = 1; // API-ключ для проверки
+// Ответ для проверки API-ключа
+message ValidateAPIKeyResponse {
+bool valid = 1;
+string sensor_id = 2;
 }
 
-
-message ValidateKeyResponse {
-
-  string token = 1;    // JWT токен, если ключ валиден
+// Запрос на получение JWT токена для сенсора
+message GenerateJWTForSensorRequest {
+string api_key = 1;  // API-ключ сенсора
 }
 
-/*
-message RegisterUserRequest {
-  string JWT = 1; // Токен, обладающий правами регистрации пользователей
-  string Username = 2; // Имя регистрируемого пользователя
-  string Password = 3; // Пароль регистрируемого пользователя
+// Ответ на запрос генерации JWT токена
+message GenerateJWTForSensorResponse {
+string token = 1;  // JWT токен
 }
 
-message RegisterResponse {
-  int64 userID = 1; // UserId
-}
-
+// Запрос на аутентификацию пользователя
 message LoginRequest {
-  string Username = 1; // Имя пользователя
-  string Password = 2; // Пароль пользователя
-  uint32 appID = 3; // ID приложения 
+string username = 1;
+string password = 2;
 }
 
-message LoginResponse{
-  string JWT = 1; // JWT токен авторизованного пользователя
+// Ответ на аутентификацию пользователя
+message LoginResponse {
+string token = 1; // JWT токен
 }
 
-message GetUserPermissionsRequest{
-  string user_id = 1; // UserId запрашиваемого пользователя
-  string JWT = 2; 
+// Запрос проверки валидности JWT токена
+message ValidateJWTRequest {
+string token = 1;
 }
 
-message GetUserPermissionsResponse{
-  repeated string UserPermissions = 1; //Разрешения пользователя
+// Ответ проверки валидности JWT токена
+message ValidateJWTResponse {
+bool valid = 1;
+string subject = 2; // ID пользователя или сенсора
+string role = 3;    // Роль пользователя
 }
 
-message GetKeyPermissionsRequest{
-  string Key = 1; // API ключ, разрешения которого запрашиваем
-  string JWT = 2;
+/////////////////////////
+// Управление пользователями
+/////////////////////////
+
+// Запрос на создание пользователя
+message CreateUserRequest {
+string username = 1;
+string password = 2;
+string role = 3; // Роль нового пользователя ("admin", "analyst", "viewer")
 }
 
-message GetKeyPermissionsResponse{
-  repeated string UserPermissions = 1; //Разрешения API ключа
+// Ответ на создание пользователя
+message CreateUserResponse {
+bool success = 1;
 }
 
-message UpdateUserPermissionsRequest{
-  string user_id = 1; // UserId запрашиваемого пользователя
-  string JWT = 2; 
-  repeated string Permissions = 3; // Обновленные разрешения
+// Запрос на удаление пользователя
+message DeleteUserRequest {
+string username = 1;
 }
 
-message UpdateUserPermissionsResponse{
-  string Error = 1; // Сообщение в случае ошибки 
+// Ответ на удаление пользователя
+message DeleteUserResponse {
+bool success = 1;
 }
 
-message UpdateKeyPermissionsRequest{
-  string Key = 1; // API ключ
-  string JWT = 2; 
-  repeated string Permissions = 3; // Обновленные разрешения
+/////////////////////////
+// Управление ролями
+/////////////////////////
+
+// Запрос на получение роли пользователя
+message GetUserRoleRequest {
+string username = 1;
 }
 
-message UpdateKeyPermissionsResponse{
-  string Error = 1; // Сообщение в случае ошибки 
+// Ответ на получение роли пользователя
+message GetUserRoleResponse {
+string role = 1;
 }
 
-*/
+// Запрос на изменение роли пользователя
+message SetUserRoleRequest {
+string username = 1;
+string role = 2; // Новая роль ("admin", "analyst", "viewer")
+}
+
+// Ответ на изменение роли пользователя
+message SetUserRoleResponse {
+bool success = 1;
+}
+
+/////////////////////////
+// Управление API-ключами
+/////////////////////////
+
+// Запрос на генерацию нового API-ключа
+message GenerateAPIKeyRequest {
+string description = 1; // Описание сенсора
+}
+
+// Ответ на генерацию нового API-ключа
+message GenerateAPIKeyResponse {
+string api_key = 1; // Новый API-ключ
+}
+
+// Запрос на отзыв API-ключа
+message RevokeAPIKeyRequest {
+string api_key = 1;
+}
+
+// Ответ на отзыв API-ключа
+message RevokeAPIKeyResponse {
+bool success = 1;
+}

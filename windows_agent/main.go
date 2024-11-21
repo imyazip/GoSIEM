@@ -87,12 +87,12 @@ func getToken(apiKey string) (string, error) {
 	client := pb.NewAuthServiceClient(conn)
 
 	// Создаем запрос с API-ключом
-	req := &pb.ValidateKeyRequest{
-		Key: apiKey,
+	req := &pb.GenerateJWTForSensorRequest{
+		ApiKey: apiKey,
 	}
 
 	// Отправляем запрос и получаем ответ
-	res, err := client.ValidateKey(context.Background(), req)
+	res, err := client.GenerateJWTForSensor(context.Background(), req)
 	if err != nil {
 		return "", fmt.Errorf("error during request: %v", err)
 	}
