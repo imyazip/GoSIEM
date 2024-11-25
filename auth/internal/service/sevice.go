@@ -4,6 +4,7 @@ package service
 import (
 	"context"
 	"errors"
+	"fmt"
 	"log"
 	"time"
 
@@ -84,6 +85,7 @@ func (s *AuthService) CreateNewUser(ctx context.Context, username string, passwo
 	// Проверяем валидность токена
 	valid, role, err := jwt.ValidateUserJWT(token, s.config.JWT.SecretKey)
 	if err != nil || !valid || role != "admin" {
+		fmt.Println(role)
 		return errors.New("invalid or insufficient token")
 	}
 
@@ -117,8 +119,9 @@ func (s *AuthService) GenerateJWTFromUser(ctx context.Context, username string, 
 	if err != nil {
 		return "", err
 	}
-
+	fmt.Println(s.config.JWT.ExpirationMinutes)
 	expirationTime := time.Now().Add(time.Duration(s.config.JWT.ExpirationMinutes) * time.Minute)
+	fmt.Println(expirationTime)
 	token, err := jwt.GenerateUserJWT(s.config.JWT.SecretKey, user.ID, user.Username, role, expirationTime)
 	if err != nil {
 		return "", err

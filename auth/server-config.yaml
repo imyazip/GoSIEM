@@ -10,5 +10,5 @@ server:
   port: 50051
 
 jwt:
-  secretKey: "your-secret-key"
-  expirationMinutes: 60
+  secretKey: "test_key"
+  expiration_minutes: 60
