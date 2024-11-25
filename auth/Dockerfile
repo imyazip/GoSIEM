@@ -26,8 +26,9 @@ WORKDIR /root/
 COPY --from=builder /auth-server .
 
 # Копируем конфигурационный файл в контейнер
+COPY ./migrations /root/migrations
 COPY server-config.yaml /root/
-
+ 
 # Открываем порт для gRPC
 EXPOSE 50051
 

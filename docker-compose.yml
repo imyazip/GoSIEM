@@ -14,7 +14,7 @@ services:
     ports:
       - "3306:3306"                     # Открываем порт для внешних соединений
     networks:
-      - app-network
+      - app-network 
 
   # Сервис для вашего Go-сервера (auth)
   auth-server:
@@ -22,7 +22,7 @@ services:
       context: ./auth  # Путь до директории с Dockerfile
       dockerfile: Dockerfile  # Явно указываем на Dockerfile в папке auth
     depends_on:
-      - mysql  # Зависимость от MySQL сервиса
+      - mysql
     environment:
       - DATABASE_HOST=mysql
       - DATABASE_PORT=3306

@@ -1,10 +1,12 @@
 package main
 
 import (
+	"context"
 	"database/sql"
 	"fmt"
 	"log"
 	"net"
+	"time"
 
 	_ "github.com/go-sql-driver/mysql"
 	handler "github.com/imyazip/GoSIEM/auth/internal/server"
@@ -32,6 +34,32 @@ func main() {
 	defer db.Close()
 
 	storage := storage.NewStorage(db)
+
+	// Контекст с таймаутом для попыток выполнения миграции
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+
+	// Количество попыток миграции
+	maxRetries := 5
+	for i := 0; i < maxRetries; i++ {
+		// Пытаемся выполнить миграции
+		err := storage.ExecuteMigrations(ctx, "/root/migrations")
+		if err == nil {
+			log.Println("Migrations applied successfully.")
+			break // Если миграции прошли успешно, выходим из цикла
+		}
+
+		// Если произошла ошибка, выводим ее и пробуем снова
+		log.Printf("Migration attempt %d failed: %v. Retrying...", i+1, err)
+
+		// Ожидаем перед повторной попыткой
+		time.Sleep(5 * time.Second)
+	}
+
+	// Если миграции не были выполнены после максимального количества попыток, завершаем выполнение
+	if err != nil {
+		log.Fatalf("Failed to apply migrations after %d attempts: %v", maxRetries, err)
+	}
 
 	authService := *auth.NewAuthService(*storage, cfg)
 
