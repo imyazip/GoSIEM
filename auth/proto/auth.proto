@@ -6,15 +6,15 @@ option go_package = "github.com/imyazip/GoSIEM/auth/;auth";
 // Сервис авторизации
 service AuthService {
 // API для сенсоров
-rpc ValidateAPIKey (ValidateAPIKeyRequest) returns (ValidateAPIKeyResponse);
-rpc GenerateJWTForSensor (GenerateJWTForSensorRequest) returns (GenerateJWTForSensorResponse);
+rpc ValidateJWTKey (ValidateJWTKeyRequest) returns (ValidateJWTKeyResponse);
+rpc GenerateJWTForSensor (GenerateJWTForSensorRequest) returns (GenerateJWTForSensorResponse); // Реализовано
 
 // API для пользователей
-rpc Login (LoginRequest) returns (LoginResponse);
-rpc ValidateJWT (ValidateJWTRequest) returns (ValidateJWTResponse);
+rpc Login (LoginRequest) returns (LoginResponse); // Реализовано
+rpc ValidateJWTUser (ValidateJWTUserRequest) returns (ValidateJWTUserResponse); 
 
 // Управление пользователями
-rpc CreateUser (CreateUserRequest) returns (CreateUserResponse);
+rpc CreateUser (CreateUserRequest) returns (CreateUserResponse); // Реализовано
 rpc DeleteUser (DeleteUserRequest) returns (DeleteUserResponse);
 
 // Управление ролями
@@ -31,19 +31,25 @@ rpc RevokeAPIKey (RevokeAPIKeyRequest) returns (RevokeAPIKeyResponse);
 /////////////////////////
 
 // Запрос для проверки API-ключа
-message ValidateAPIKeyRequest {
-string api_key = 1;
+message ValidateJWTKeyRequest {
+string JWT = 1;
 }
 
 // Ответ для проверки API-ключа
-message ValidateAPIKeyResponse {
+message ValidateJWTKeyResponse {
 bool valid = 1;
-string sensor_id = 2;
+int64 sensor_id = 2;
 }
 
 // Запрос на получение JWT токена для сенсора
-message GenerateJWTForSensorRequest {
+message GenerateJWTForSensorRequest { // Реализовано
 string api_key = 1;  // API-ключ сенсора
+string sensor_id = 2; // Уникальный sensor id
+string name = 3;
+string hostname = 4;
+string os_version = 5;
+string sensor_type = 6;
+string agent_version = 7;
 }
 
 // Ответ на запрос генерации JWT токена
@@ -63,14 +69,14 @@ string token = 1; // JWT токен
 }
 
 // Запрос проверки валидности JWT токена
-message ValidateJWTRequest {
+message ValidateJWTUserRequest {
 string token = 1;
 }
 
 // Ответ проверки валидности JWT токена
-message ValidateJWTResponse {
+message ValidateJWTUserResponse {
 bool valid = 1;
-string subject = 2; // ID пользователя или сенсора
+int64 user_id = 2;
 string role = 3;    // Роль пользователя
 }
 
@@ -148,3 +154,5 @@ string api_key = 1;
 message RevokeAPIKeyResponse {
 bool success = 1;
 }
+
+

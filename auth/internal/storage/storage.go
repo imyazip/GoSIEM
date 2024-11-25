@@ -105,3 +105,58 @@ func (s *Storage) GetRoleNameByID(ctx context.Context, roleID int64) (string, er
 
 	return roleName, nil
 }
+
+func (s *Storage) CheckSensorExists(ctx context.Context, sensorID string) (bool, error) {
+	// Запрос для проверки существования сенсора в базе данных
+	var count int
+	err := s.db.QueryRowContext(ctx, "SELECT COUNT(*) FROM sensors WHERE sensor_id = ?", sensorID).Scan(&count)
+	if err != nil {
+		return false, fmt.Errorf("error checking if sensor exists: %v", err)
+	}
+
+	// Возвращаем true, если сенсор найден (count > 0), иначе false
+	return count > 0, nil
+}
+
+func (s *Storage) InsertSensor(ctx context.Context, sensor models.Sensor) error {
+	_, err := s.db.ExecContext(ctx, "INSERT INTO sensors (sensor_id, name, hostname,os_version, sensor_type, agent_version) VALUES (?, ?, ?, ?, ?, ?)", sensor.Sensor_id, sensor.Name, sensor.Hostname, sensor.Os_version, sensor.Sensor_type, sensor.Agent_version)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// UpdateSensor обновляет данные о сенсоре в базе данных по sensor_id
+func (s *Storage) UpdateSensor(ctx context.Context, sensor models.Sensor) error {
+	// Проверка, что sensor_id указан
+	if sensor.Sensor_id == "" {
+		return errors.New("sensor_id is required")
+	}
+
+	// SQL-запрос для обновления данных о сенсоре
+	query := `
+		UPDATE sensors
+		SET 
+			name = ?, 
+			hostname = ?,
+			os_version = ?, 
+			sensor_type = ?, 
+			agent_version = ?
+		WHERE sensor_id = ?`
+
+	// Выполнение запроса с использованием контекста
+	_, err := s.db.ExecContext(ctx, query,
+		sensor.Name,
+		sensor.Hostname,
+		sensor.Os_version,
+		sensor.Sensor_type,
+		sensor.Agent_version,
+		sensor.Sensor_id,
+	)
+	if err != nil {
+		return fmt.Errorf("failed to update sensor: %w", err)
+	}
+
+	return nil
+}

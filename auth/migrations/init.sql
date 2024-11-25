@@ -24,6 +24,18 @@ CREATE TABLE api_keys (
     revoked BOOLEAN DEFAULT FALSE
 );
 
+-- Таблица сенсоров
+CREATE TABLE sensors (
+    id INT AUTO_INCREMENT PRIMARY KEY,  
+    sensor_id VARCHAR(255) UNIQUE NOT NULL,
+    name VARCHAR(255) NOT NULL,
+    hostname VARCHAR(255) NOT NULL,  
+    os_version VARCHAR(255) NOT NULL,          
+    sensor_type VARCHAR(50) NOT NULL,             
+    agent_version VARCHAR(50),          
+    created_at TIMESTAMP DEFAULT NOW() 
+);
+
 -- Добавляем роль admin
 INSERT INTO roles (role_name, description) 
 VALUES ('admin', 'Администратор с полными правами доступа')
@@ -31,5 +43,5 @@ ON DUPLICATE KEY UPDATE role_name = 'admin';
 
 -- Добавляем пользователя admin с ролью admin
 INSERT INTO users (username, password, role_id) 
-VALUES ('admin', '$2a$10$B.ITVXGQjhdW4QupKlwkfOrJz0QLKlhJt8pSLKBLqIN0pxsHoRSSK(0x0,0x0)', (SELECT id FROM roles WHERE role_name = 'admin'))
+VALUES ('admin', '$2a$10$B.ITVXGQjhdW4QupKlwkfOrJz0QLKlhJt8pSLKBLqIN0pxsHoRSSK', (SELECT id FROM roles WHERE role_name = 'admin'))
 ON DUPLICATE KEY UPDATE username = 'admin';

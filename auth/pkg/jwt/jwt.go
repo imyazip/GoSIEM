@@ -15,11 +15,18 @@ type UserClaims struct {
 	jwt.RegisteredClaims
 }
 
-func GenerateAPIJWT(secretKey string, subject string, expirationTime time.Time) (string, error) {
-	claims := &jwt.RegisteredClaims{
-		Subject:   subject,
-		ExpiresAt: jwt.NewNumericDate(expirationTime),
-		IssuedAt:  jwt.NewNumericDate(time.Now()),
+type SensorClaims struct {
+	sensor_id string
+	jwt.RegisteredClaims
+}
+
+func GenerateAPIJWT(secretKey string, sensorID string, expirationTime time.Time) (string, error) {
+	claims := SensorClaims{
+		sensor_id: sensorID,
+		RegisteredClaims: jwt.RegisteredClaims{
+			ExpiresAt: jwt.NewNumericDate(expirationTime), // Указываем время истечения токена
+			IssuedAt:  jwt.NewNumericDate(time.Now()),
+		},
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
@@ -30,7 +37,6 @@ func GenerateAPIJWT(secretKey string, subject string, expirationTime time.Time) 
 // GenerateUserJWT генерирует JWT токен для пользователя.
 func GenerateUserJWT(secretKey string, userID int64, username string, role string, expirationTime time.Time) (string, error) {
 	// Создаем данные для токена
-	expirationTime = time.Now().Add(time.Minute * 90)
 	claims := UserClaims{
 		UserID:   userID,
 		Username: username,
@@ -38,7 +44,6 @@ func GenerateUserJWT(secretKey string, userID int64, username string, role strin
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(expirationTime), // Указываем время истечения токена
 			IssuedAt:  jwt.NewNumericDate(time.Now()),     // Указываем время создания токена
-			Subject:   username,                           // Основная информация о субъекте
 		},
 	}
 
@@ -76,6 +81,33 @@ func ValidateUserJWT(tokenStr string, secretKey string) (bool, string, error) {
 		}
 		// Возвращаем роль пользователя и успешную валидацию
 		return true, claims.Role, nil
+	}
+
+	return false, "", fmt.Errorf("invalid token claims")
+}
+
+func ValidateAPIJWT(tokenStr string, secretKey string) (bool, string, error) {
+	// Парсим токен с использованием секретного ключа
+	token, err := jwt.ParseWithClaims(tokenStr, &jwt.RegisteredClaims{}, func(token *jwt.Token) (interface{}, error) {
+		// Проверяем, что метод подписи соответствует HS256
+		if token.Method != jwt.SigningMethodHS256 {
+			return nil, fmt.Errorf("unexpected signing method: %v", token.Method)
+		}
+		// Возвращаем секретный ключ в виде []byte для проверки подписи
+		return []byte(secretKey), nil
+	})
+	if err != nil {
+		return false, "", fmt.Errorf("invalid token: %v", err)
+	}
+
+	// Проверяем, что токен действителен
+	if claims, ok := token.Claims.(*jwt.RegisteredClaims); ok && token.Valid {
+		// Проверка времени истечения срока действия токена (если есть)
+		if claims.ExpiresAt != nil && claims.ExpiresAt.Time.Before(time.Now().Add(-time.Second)) { // Даем немного времени на синхронизацию
+			return false, "", fmt.Errorf("token has expired")
+		}
+		// Возвращаем информацию о токене и успешную валидацию
+		return true, claims.Subject, nil
 	}
 
 	return false, "", fmt.Errorf("invalid token claims")

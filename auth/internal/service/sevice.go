@@ -7,6 +7,7 @@ import (
 	"log"
 	"time"
 
+	"github.com/imyazip/GoSIEM/auth/internal/models"
 	"github.com/imyazip/GoSIEM/auth/internal/storage"
 	"github.com/imyazip/GoSIEM/auth/pkg/config"
 	"github.com/imyazip/GoSIEM/auth/pkg/hash"
@@ -30,7 +31,25 @@ func NewAuthService(db storage.Storage, config *config.Config) *AuthService {
 // GenerateJWTFromAPIKey генерирует JWT токен для переданного API ключа.
 // Он проверяет, существует ли API ключ в базе данных, и если ключ действителен,
 // генерирует и возвращает JWT токен с заданным временем истечения.
-func (s *AuthService) GenerateJWTFromAPIKey(ctx context.Context, apiKey string) (string, error) {
+func (s *AuthService) GenerateJWTFromAPIKey(ctx context.Context, apiKey string, sensor models.Sensor) (string, error) {
+	exists, err := s.db.CheckSensorExists(ctx, sensor.Sensor_id)
+	if err != nil {
+		log.Printf("Error finding sensor in db: %v", err)
+	}
+
+	if !exists {
+		err = s.db.InsertSensor(ctx, sensor)
+		if err != nil {
+			log.Printf("Error inserting sensor in db: %v", err)
+		}
+	}
+
+	err = s.db.UpdateSensor(ctx, sensor)
+	if err != nil {
+		log.Printf("Error updating sensor in db: %v", err)
+	}
+
+	expirationTime := time.Now().Add(time.Duration(s.config.JWT.ExpirationMinutes) * time.Minute)
 	valid, err := s.db.FindAPIKeyInStorage(ctx, apiKey)
 	if err != nil {
 		log.Printf("Error validating API key: %v", err)
@@ -41,8 +60,7 @@ func (s *AuthService) GenerateJWTFromAPIKey(ctx context.Context, apiKey string) 
 		return "", errors.New("invalid API key")
 	}
 
-	expirationTime := time.Now().Add(time.Duration(s.config.JWT.ExpirationMinutes) * time.Minute)
-	return jwt.GenerateAPIJWT(s.config.JWT.SecretKey, apiKey, expirationTime)
+	return jwt.GenerateAPIJWT(s.config.JWT.SecretKey, sensor.Sensor_id, expirationTime)
 }
 
 func (s *AuthService) CreateNewUser(ctx context.Context, username string, password string, roleID int64) error {

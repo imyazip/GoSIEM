@@ -4,6 +4,7 @@ package server
 import (
 	"context"
 
+	"github.com/imyazip/GoSIEM/auth/internal/models"
 	auth "github.com/imyazip/GoSIEM/auth/internal/service"
 	pb "github.com/imyazip/GoSIEM/auth/proto"
 )
@@ -21,7 +22,15 @@ func NewAuthAPI(service *auth.AuthService) *AuthAPI {
 
 // Реализация rpc метода GenerateJWTForSensor, генерирует JWT токен для сенора, используя переданный API-ключ.
 func (h *AuthAPI) GenerateJWTForSensor(ctx context.Context, req *pb.GenerateJWTForSensorRequest) (*pb.GenerateJWTForSensorResponse, error) {
-	token, err := h.service.GenerateJWTFromAPIKey(ctx, req.ApiKey)
+	var sensor models.Sensor
+	sensor.Sensor_id = req.SensorId
+	sensor.Name = req.Name
+	sensor.Hostname = req.Hostname
+	sensor.Os_version = req.OsVersion
+	sensor.Sensor_type = req.SensorType
+	sensor.Agent_version = req.AgentVersion
+
+	token, err := h.service.GenerateJWTFromAPIKey(ctx, req.ApiKey, sensor)
 
 	if err != nil {
 		return nil, err
