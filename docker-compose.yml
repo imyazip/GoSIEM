@@ -35,7 +35,6 @@ services:
       - app-network
     volumes:
       - ./auth:/auth  # Монтируем код приложения
-      - ./server-config.yaml:/root/auth/server-config.yaml  # Монтируем конфигурационный файл
 
 # Определяем том для хранения данных MySQL
 volumes:
