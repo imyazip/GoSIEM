@@ -16,11 +16,12 @@ type Win32Process struct {
 
 // Структура для представления события журнала
 type Win32NTLogEvent struct {
-	EventID  int32
-	Logfile  string
-	Message  string
-	Category string
-	Source   string
+	EventID          int32
+	Logfile          string
+	Message          string
+	Category         string
+	Source           string
+	InsertionStrings []string
 }
 
 // Функция для мониторинга создания процессов
@@ -177,11 +178,12 @@ func monitorEvtx() (<-chan Win32NTLogEvent, <-chan error) {
 			defer targetInstance.Release()
 
 			logEvent := Win32NTLogEvent{
-				EventID:  int32(oleutil.MustGetProperty(targetInstance, "EventCode").Val),
-				Logfile:  safeGetStringProperty(targetInstance, "Logfile"),
-				Message:  safeGetStringProperty(targetInstance, "Message"),
-				Category: safeGetStringProperty(targetInstance, "CategoryString"),
-				Source:   safeGetStringProperty(targetInstance, "SourceName"),
+				EventID:          int32(oleutil.MustGetProperty(targetInstance, "EventCode").Val),
+				Logfile:          safeGetStringProperty(targetInstance, "Logfile"),
+				Message:          safeGetStringProperty(targetInstance, "Message"),
+				Category:         safeGetStringProperty(targetInstance, "CategoryString"),
+				Source:           safeGetStringProperty(targetInstance, "SourceName"),
+				InsertionStrings: extractInsertionStrings(targetInstance),
 			}
 
 			logCh <- logEvent
@@ -198,4 +200,56 @@ func safeGetStringProperty(obj *ole.IDispatch, propName string) string {
 		return "" // Возвращаем пустую строку, если свойство не существует
 	}
 	return prop.ToString()
+}
+
+// Функция для извлечения InsertionStrings из объекта WMI
+func extractInsertionStrings(targetInstance *ole.IDispatch) []string {
+	insertionStrings := []string{}
+
+	// Попытка получить свойство InsertionStrings
+	insertionStringsRaw, err := oleutil.GetProperty(targetInstance, "InsertionStrings")
+	if err != nil {
+		fmt.Printf("Error fetching InsertionStrings property: %v\n", err)
+		return insertionStrings
+	}
+
+	// Проверка типа данных
+	if insertionStringsRaw.VT != (ole.VT_ARRAY | ole.VT_VARIANT) {
+		fmt.Printf("Unexpected variant type: VT(%d)\n", insertionStringsRaw.VT)
+		return insertionStrings
+	}
+
+	// Преобразование в SafeArray
+	safeArray := insertionStringsRaw.ToArray()
+	if safeArray == nil {
+		fmt.Println("SafeArray conversion failed.")
+		return insertionStrings
+	}
+	defer safeArray.Release()
+
+	// Преобразование SafeArray в массив значений
+	values := safeArray.ToValueArray()
+	if len(values) == 0 {
+		fmt.Println("No values in SafeArray.")
+		return insertionStrings
+	}
+
+	// Обработка каждого элемента массива
+	for _, value := range values {
+		// Проверяем, что элемент является строкой
+		switch v := value.(type) {
+		case string:
+			insertionStrings = append(insertionStrings, v)
+		case *ole.VARIANT:
+			if v.VT == ole.VT_BSTR {
+				insertionStrings = append(insertionStrings, v.ToString())
+			} else {
+				fmt.Printf("Unsupported variant type in array: VT(%d)\n", v.VT)
+			}
+		default:
+			fmt.Printf("Non-string value found in SafeArray: %v (type %T)\n", value, value)
+		}
+	}
+
+	return insertionStrings
 }
