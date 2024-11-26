@@ -11,16 +11,19 @@ import (
 )
 
 func main() {
-	apiKey := "your-api-key"
-	token, err := getToken(apiKey)
-	if err != nil {
-		log.Fatalf("Failed to get token: %v", err)
-	}
+	/*
+		apiKey := "your-api-key"
+		token, err := getToken(apiKey)
+		if err != nil {
+			log.Fatalf("Failed to get token: %v", err)
+		}
 
-	// Выводим полученный токен
-	fmt.Printf("Received token: %s\n", token)
-	// Инициализация OLE
-	err = ole.CoInitializeEx(0, ole.COINIT_MULTITHREADED)
+		// Выводим полученный токен
+		fmt.Printf("Received token: %s\n", token)
+		// Инициализация OLE
+	*/
+
+	err := ole.CoInitializeEx(0, ole.COINIT_MULTITHREADED)
 	if err != nil {
 		log.Fatalf("Failed to initialize OLE: %v\n", err)
 	}
@@ -62,7 +65,12 @@ func main() {
 		for {
 			select {
 			case logEvent := <-logCh:
-				fmt.Printf("[Log Event - %s]\n", logEvent.Message)
+				//fmt.Printf("[Log Event - %s]\n", logEvent.InsertionStrings)
+				fmt.Println(logEvent.EventID)
+				fmt.Println(logEvent.Message)
+				for i, value := range logEvent.InsertionStrings {
+					fmt.Println(i, ": [", value, "]")
+				}
 			case err := <-logErrCh:
 				if err != nil {
 					fmt.Printf("[Error - Log Event - %s]\n", err)
