@@ -6,6 +6,7 @@ import (
 	"log"
 
 	"github.com/go-ole/go-ole"
+	"github.com/imyazip/GoSIEM/windows_agent/internal/pkg/parser"
 	pb "github.com/imyazip/GoSIEM/windows_agent/proto"
 	"google.golang.org/grpc"
 )
@@ -29,7 +30,7 @@ func main() {
 
 	// Запуск мониторинга создания процессов
 	go func() {
-		processCreatedCh, processErrorCh := monitorProcessCreation()
+		processCreatedCh, processErrorCh := parser.MonitorProcessCreation()
 		for {
 			select {
 			case process := <-processCreatedCh:
@@ -44,7 +45,7 @@ func main() {
 
 	// Запуск мониторинга удаления процессов
 	go func() {
-		processDeletedCh, processDelErrorCh := monitorProcessDeletion()
+		processDeletedCh, processDelErrorCh := parser.MonitorProcessDeletion()
 		for {
 			select {
 			case process := <-processDeletedCh:
@@ -59,7 +60,7 @@ func main() {
 
 	//Запуск мониторинга evtx
 	go func() {
-		logCh, logErrCh := monitorEvtx()
+		logCh, logErrCh := parser.MonitorEvtx()
 		for {
 			select {
 			case logEvent := <-logCh:

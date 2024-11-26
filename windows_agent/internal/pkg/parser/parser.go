@@ -1,4 +1,4 @@
-package main
+package parser
 
 import (
 	"fmt"
@@ -25,12 +25,12 @@ type Win32NTLogEvent struct {
 }
 
 // Функция для мониторинга создания процессов
-func monitorProcessCreation() (<-chan Win32Process, <-chan error) {
+func MonitorProcessCreation() (<-chan Win32Process, <-chan error) {
 	return monitorProcesses("__InstanceCreationEvent")
 }
 
 // Функция для мониторинга удаления процессов
-func monitorProcessDeletion() (<-chan Win32Process, <-chan error) {
+func MonitorProcessDeletion() (<-chan Win32Process, <-chan error) {
 	return monitorProcesses("__InstanceDeletionEvent")
 }
 
@@ -113,7 +113,7 @@ func monitorProcesses(eventClass string) (<-chan Win32Process, <-chan error) {
 }
 
 // Функция для мониторинга Evtx
-func monitorEvtx() (<-chan Win32NTLogEvent, <-chan error) {
+func MonitorEvtx() (<-chan Win32NTLogEvent, <-chan error) {
 	logCh := make(chan Win32NTLogEvent)
 	errorCh := make(chan error)
 
