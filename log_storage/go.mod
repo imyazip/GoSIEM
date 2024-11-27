@@ -1,4 +1,4 @@
-module log-storage
+module github.com/imyazip/GoSIEM/log-storage
 
 go 1.23.2
 
