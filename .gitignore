@@ -1,3 +1,6 @@
 auth/tests/
 windows_agent/agent.exe
 .vscode
+auth/proto/
+log_storage/proto/
+windows_agent/proto/
