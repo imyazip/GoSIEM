@@ -28,8 +28,8 @@ service AuthService {
 }
 
 service LogStorageService {
-    rpc TransferRawStringLog (stream TransferRawStringLogRequest) returns (TransferRawStringLogResponse);
-    rpc TranserSerializedLog (stream TranserSerializedLogRequest) returns (TranserSerializedLogResponse);
+    rpc TransferRawStringLog (TransferRawStringLogRequest) returns (TransferRawStringLogResponse);
+    rpc TranserSerializedLog (TranserSerializedLogRequest) returns (TranserSerializedLogResponse);
 }
 
 /////////////////////////

@@ -1,4 +1,4 @@
-CREATE TABLE raw_logs (
+CREATE TABLE IF NOT EXISTS raw_logs (
     id INT AUTO_INCREMENT PRIMARY KEY,
     log_source VARCHAR(255) NOT NULL,  -- Источник лога
     log_string TEXT NOT NULL,          -- Содержимое лога в виде строки
@@ -7,7 +7,7 @@ CREATE TABLE raw_logs (
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE TABLE serialized_logs (
+CREATE TABLE IF NOT EXISTS serialized_logs (
     id INT AUTO_INCREMENT PRIMARY KEY,
     log_source VARCHAR(255) NOT NULL,  -- Источник лога
     log_serialized JSON NOT NULL,       -- Сериализованные данные лога (JSON строка)
@@ -15,4 +15,3 @@ CREATE TABLE serialized_logs (
     sensor_id BIGINT NOT NULL,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
-

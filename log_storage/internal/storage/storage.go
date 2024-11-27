@@ -1,7 +1,14 @@
 package storage
 
 import (
+	"bufio"
+	"context"
 	"database/sql"
+	"fmt"
+	"log"
+	"os"
+	"path/filepath"
+	"strings"
 	"time"
 )
 
@@ -28,6 +35,65 @@ func (s *Storage) InsertSerializedLog(source string, logSerialized string, creat
 	_, err := s.db.Exec(query, source, logSerialized, createdAt, sensorId)
 	if err != nil {
 		return err
+	}
+
+	return nil
+}
+
+func (s *Storage) ExecuteMigrations(ctx context.Context, migrationsDir string) error {
+	// Открываем директорию с миграциями
+	files, err := os.ReadDir(migrationsDir)
+	if err != nil {
+		return fmt.Errorf("failed to read migrations directory: %v", err)
+	}
+
+	// Проходим по всем файлам в директории
+	for _, file := range files {
+		if filepath.Ext(file.Name()) != ".sql" {
+			continue // Пропускаем файлы, не являющиеся .sql
+		}
+
+		// Открываем каждый файл для чтения
+		filePath := filepath.Join(migrationsDir, file.Name())
+		migrationFile, err := os.Open(filePath)
+		if err != nil {
+			return fmt.Errorf("failed to open migration file %s: %v", filePath, err)
+		}
+		defer migrationFile.Close()
+
+		// Читаем содержимое файла
+		var queries []string
+		scanner := bufio.NewScanner(migrationFile)
+		var currentQuery strings.Builder
+		for scanner.Scan() {
+			line := scanner.Text()
+
+			// Игнорируем пустые строки и комментарии
+			if strings.TrimSpace(line) == "" || strings.HasPrefix(line, "--") {
+				continue
+			}
+
+			// Собираем SQL-запросы
+			currentQuery.WriteString(line)
+			if strings.HasSuffix(strings.TrimSpace(line), ";") {
+				queries = append(queries, currentQuery.String())
+				currentQuery.Reset()
+			}
+		}
+
+		if err := scanner.Err(); err != nil {
+			return fmt.Errorf("error reading migration file %s: %v", filePath, err)
+		}
+
+		// Выполняем каждый запрос из миграции
+		for _, query := range queries {
+			_, err := s.db.ExecContext(ctx, query)
+			if err != nil {
+				return fmt.Errorf("failed to execute query from migration file %s: %v", filePath, err)
+			}
+		}
+
+		log.Printf("Successfully executed migration file: %s", file.Name())
 	}
 
 	return nil
