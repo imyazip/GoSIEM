@@ -19,10 +19,10 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	AuthService_ValidateAPIKey_FullMethodName       = "/auth.AuthService/ValidateAPIKey"
+	AuthService_ValidateJWTKey_FullMethodName       = "/auth.AuthService/ValidateJWTKey"
 	AuthService_GenerateJWTForSensor_FullMethodName = "/auth.AuthService/GenerateJWTForSensor"
 	AuthService_Login_FullMethodName                = "/auth.AuthService/Login"
-	AuthService_ValidateJWT_FullMethodName          = "/auth.AuthService/ValidateJWT"
+	AuthService_ValidateJWTUser_FullMethodName      = "/auth.AuthService/ValidateJWTUser"
 	AuthService_CreateUser_FullMethodName           = "/auth.AuthService/CreateUser"
 	AuthService_DeleteUser_FullMethodName           = "/auth.AuthService/DeleteUser"
 	AuthService_GetUserRole_FullMethodName          = "/auth.AuthService/GetUserRole"
@@ -38,11 +38,11 @@ const (
 // Сервис авторизации
 type AuthServiceClient interface {
 	// API для сенсоров
-	ValidateAPIKey(ctx context.Context, in *ValidateAPIKeyRequest, opts ...grpc.CallOption) (*ValidateAPIKeyResponse, error)
+	ValidateJWTKey(ctx context.Context, in *ValidateJWTKeyRequest, opts ...grpc.CallOption) (*ValidateJWTKeyResponse, error)
 	GenerateJWTForSensor(ctx context.Context, in *GenerateJWTForSensorRequest, opts ...grpc.CallOption) (*GenerateJWTForSensorResponse, error)
 	// API для пользователей
 	Login(ctx context.Context, in *LoginRequest, opts ...grpc.CallOption) (*LoginResponse, error)
-	ValidateJWT(ctx context.Context, in *ValidateJWTRequest, opts ...grpc.CallOption) (*ValidateJWTResponse, error)
+	ValidateJWTUser(ctx context.Context, in *ValidateJWTUserRequest, opts ...grpc.CallOption) (*ValidateJWTUserResponse, error)
 	// Управление пользователями
 	CreateUser(ctx context.Context, in *CreateUserRequest, opts ...grpc.CallOption) (*CreateUserResponse, error)
 	DeleteUser(ctx context.Context, in *DeleteUserRequest, opts ...grpc.CallOption) (*DeleteUserResponse, error)
@@ -62,10 +62,10 @@ func NewAuthServiceClient(cc grpc.ClientConnInterface) AuthServiceClient {
 	return &authServiceClient{cc}
 }
 
-func (c *authServiceClient) ValidateAPIKey(ctx context.Context, in *ValidateAPIKeyRequest, opts ...grpc.CallOption) (*ValidateAPIKeyResponse, error) {
+func (c *authServiceClient) ValidateJWTKey(ctx context.Context, in *ValidateJWTKeyRequest, opts ...grpc.CallOption) (*ValidateJWTKeyResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(ValidateAPIKeyResponse)
-	err := c.cc.Invoke(ctx, AuthService_ValidateAPIKey_FullMethodName, in, out, cOpts...)
+	out := new(ValidateJWTKeyResponse)
+	err := c.cc.Invoke(ctx, AuthService_ValidateJWTKey_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -92,10 +92,10 @@ func (c *authServiceClient) Login(ctx context.Context, in *LoginRequest, opts ..
 	return out, nil
 }
 
-func (c *authServiceClient) ValidateJWT(ctx context.Context, in *ValidateJWTRequest, opts ...grpc.CallOption) (*ValidateJWTResponse, error) {
+func (c *authServiceClient) ValidateJWTUser(ctx context.Context, in *ValidateJWTUserRequest, opts ...grpc.CallOption) (*ValidateJWTUserResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(ValidateJWTResponse)
-	err := c.cc.Invoke(ctx, AuthService_ValidateJWT_FullMethodName, in, out, cOpts...)
+	out := new(ValidateJWTUserResponse)
+	err := c.cc.Invoke(ctx, AuthService_ValidateJWTUser_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -169,11 +169,11 @@ func (c *authServiceClient) RevokeAPIKey(ctx context.Context, in *RevokeAPIKeyRe
 // Сервис авторизации
 type AuthServiceServer interface {
 	// API для сенсоров
-	ValidateAPIKey(context.Context, *ValidateAPIKeyRequest) (*ValidateAPIKeyResponse, error)
+	ValidateJWTKey(context.Context, *ValidateJWTKeyRequest) (*ValidateJWTKeyResponse, error)
 	GenerateJWTForSensor(context.Context, *GenerateJWTForSensorRequest) (*GenerateJWTForSensorResponse, error)
 	// API для пользователей
 	Login(context.Context, *LoginRequest) (*LoginResponse, error)
-	ValidateJWT(context.Context, *ValidateJWTRequest) (*ValidateJWTResponse, error)
+	ValidateJWTUser(context.Context, *ValidateJWTUserRequest) (*ValidateJWTUserResponse, error)
 	// Управление пользователями
 	CreateUser(context.Context, *CreateUserRequest) (*CreateUserResponse, error)
 	DeleteUser(context.Context, *DeleteUserRequest) (*DeleteUserResponse, error)
@@ -193,8 +193,8 @@ type AuthServiceServer interface {
 // pointer dereference when methods are called.
 type UnimplementedAuthServiceServer struct{}
 
-func (UnimplementedAuthServiceServer) ValidateAPIKey(context.Context, *ValidateAPIKeyRequest) (*ValidateAPIKeyResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method ValidateAPIKey not implemented")
+func (UnimplementedAuthServiceServer) ValidateJWTKey(context.Context, *ValidateJWTKeyRequest) (*ValidateJWTKeyResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ValidateJWTKey not implemented")
 }
 func (UnimplementedAuthServiceServer) GenerateJWTForSensor(context.Context, *GenerateJWTForSensorRequest) (*GenerateJWTForSensorResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GenerateJWTForSensor not implemented")
@@ -202,8 +202,8 @@ func (UnimplementedAuthServiceServer) GenerateJWTForSensor(context.Context, *Gen
 func (UnimplementedAuthServiceServer) Login(context.Context, *LoginRequest) (*LoginResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Login not implemented")
 }
-func (UnimplementedAuthServiceServer) ValidateJWT(context.Context, *ValidateJWTRequest) (*ValidateJWTResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method ValidateJWT not implemented")
+func (UnimplementedAuthServiceServer) ValidateJWTUser(context.Context, *ValidateJWTUserRequest) (*ValidateJWTUserResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ValidateJWTUser not implemented")
 }
 func (UnimplementedAuthServiceServer) CreateUser(context.Context, *CreateUserRequest) (*CreateUserResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreateUser not implemented")
@@ -244,20 +244,20 @@ func RegisterAuthServiceServer(s grpc.ServiceRegistrar, srv AuthServiceServer) {
 	s.RegisterService(&AuthService_ServiceDesc, srv)
 }
 
-func _AuthService_ValidateAPIKey_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ValidateAPIKeyRequest)
+func _AuthService_ValidateJWTKey_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ValidateJWTKeyRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(AuthServiceServer).ValidateAPIKey(ctx, in)
+		return srv.(AuthServiceServer).ValidateJWTKey(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: AuthService_ValidateAPIKey_FullMethodName,
+		FullMethod: AuthService_ValidateJWTKey_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(AuthServiceServer).ValidateAPIKey(ctx, req.(*ValidateAPIKeyRequest))
+		return srv.(AuthServiceServer).ValidateJWTKey(ctx, req.(*ValidateJWTKeyRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -298,20 +298,20 @@ func _AuthService_Login_Handler(srv interface{}, ctx context.Context, dec func(i
 	return interceptor(ctx, in, info, handler)
 }
 
-func _AuthService_ValidateJWT_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ValidateJWTRequest)
+func _AuthService_ValidateJWTUser_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ValidateJWTUserRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(AuthServiceServer).ValidateJWT(ctx, in)
+		return srv.(AuthServiceServer).ValidateJWTUser(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: AuthService_ValidateJWT_FullMethodName,
+		FullMethod: AuthService_ValidateJWTUser_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(AuthServiceServer).ValidateJWT(ctx, req.(*ValidateJWTRequest))
+		return srv.(AuthServiceServer).ValidateJWTUser(ctx, req.(*ValidateJWTUserRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -432,8 +432,8 @@ var AuthService_ServiceDesc = grpc.ServiceDesc{
 	HandlerType: (*AuthServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "ValidateAPIKey",
-			Handler:    _AuthService_ValidateAPIKey_Handler,
+			MethodName: "ValidateJWTKey",
+			Handler:    _AuthService_ValidateJWTKey_Handler,
 		},
 		{
 			MethodName: "GenerateJWTForSensor",
@@ -444,8 +444,8 @@ var AuthService_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _AuthService_Login_Handler,
 		},
 		{
-			MethodName: "ValidateJWT",
-			Handler:    _AuthService_ValidateJWT_Handler,
+			MethodName: "ValidateJWTUser",
+			Handler:    _AuthService_ValidateJWTUser_Handler,
 		},
 		{
 			MethodName: "CreateUser",

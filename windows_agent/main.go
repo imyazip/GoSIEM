@@ -6,24 +6,23 @@ import (
 	"log"
 
 	"github.com/go-ole/go-ole"
+	"github.com/imyazip/GoSIEM/windows_agent/internal/pkg/parser"
 	pb "github.com/imyazip/GoSIEM/windows_agent/proto"
 	"google.golang.org/grpc"
 )
 
 func main() {
-	/*
-		apiKey := "your-api-key"
-		token, err := getToken(apiKey)
-		if err != nil {
-			log.Fatalf("Failed to get token: %v", err)
-		}
+	apiKey := "api_key"
+	token, err := getToken(apiKey)
+	if err != nil {
+		log.Fatalf("Failed to get token: %v", err)
+	}
 
-		// Выводим полученный токен
-		fmt.Printf("Received token: %s\n", token)
-		// Инициализация OLE
-	*/
+	// Выводим полученный токен
+	fmt.Printf("Received token: %s\n", token)
+	// Инициализация OLE
 
-	err := ole.CoInitializeEx(0, ole.COINIT_MULTITHREADED)
+	err = ole.CoInitializeEx(0, ole.COINIT_MULTITHREADED)
 	if err != nil {
 		log.Fatalf("Failed to initialize OLE: %v\n", err)
 	}
@@ -31,7 +30,7 @@ func main() {
 
 	// Запуск мониторинга создания процессов
 	go func() {
-		processCreatedCh, processErrorCh := monitorProcessCreation()
+		processCreatedCh, processErrorCh := parser.MonitorProcessCreation()
 		for {
 			select {
 			case process := <-processCreatedCh:
@@ -46,7 +45,7 @@ func main() {
 
 	// Запуск мониторинга удаления процессов
 	go func() {
-		processDeletedCh, processDelErrorCh := monitorProcessDeletion()
+		processDeletedCh, processDelErrorCh := parser.MonitorProcessDeletion()
 		for {
 			select {
 			case process := <-processDeletedCh:
@@ -61,7 +60,7 @@ func main() {
 
 	//Запуск мониторинга evtx
 	go func() {
-		logCh, logErrCh := monitorEvtx()
+		logCh, logErrCh := parser.MonitorEvtx()
 		for {
 			select {
 			case logEvent := <-logCh:
@@ -85,7 +84,7 @@ func main() {
 // Функция для получения токена
 func getToken(apiKey string) (string, error) {
 	// Создаем соединение с gRPC сервером
-	conn, err := grpc.Dial("localhost:50051", grpc.WithInsecure()) // Замените на актуальный адрес
+	conn, err := grpc.Dial("localhost:80", grpc.WithInsecure()) // Замените на актуальный адрес
 	if err != nil {
 		return "", fmt.Errorf("did not connect: %v", err)
 	}
