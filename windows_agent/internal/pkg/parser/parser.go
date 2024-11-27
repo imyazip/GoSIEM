@@ -8,14 +8,14 @@ import (
 )
 
 // Структура для представления процесса
-type Win32Process struct {
+type Win32_Process struct {
 	ProcessID   int32
 	Name        string
 	CommandLine string
 }
 
 // Структура для представления события журнала
-type Win32NTLogEvent struct {
+type Win32_NTLogEvent struct {
 	EventID          int32
 	Logfile          string
 	Message          string
@@ -25,18 +25,18 @@ type Win32NTLogEvent struct {
 }
 
 // Функция для мониторинга создания процессов
-func MonitorProcessCreation() (<-chan Win32Process, <-chan error) {
+func MonitorProcessCreation() (<-chan Win32_Process, <-chan error) {
 	return monitorProcesses("__InstanceCreationEvent")
 }
 
 // Функция для мониторинга удаления процессов
-func MonitorProcessDeletion() (<-chan Win32Process, <-chan error) {
+func MonitorProcessDeletion() (<-chan Win32_Process, <-chan error) {
 	return monitorProcesses("__InstanceDeletionEvent")
 }
 
 // Универсальная функция для мониторинга процессов
-func monitorProcesses(eventClass string) (<-chan Win32Process, <-chan error) {
-	processCh := make(chan Win32Process)
+func monitorProcesses(eventClass string) (<-chan Win32_Process, <-chan error) {
+	processCh := make(chan Win32_Process)
 	errorCh := make(chan error)
 
 	go func() {
@@ -99,7 +99,7 @@ func monitorProcesses(eventClass string) (<-chan Win32Process, <-chan error) {
 			targetInstance := targetInstanceRaw.ToIDispatch()
 			defer targetInstance.Release()
 
-			process := Win32Process{
+			process := Win32_Process{
 				ProcessID:   int32(oleutil.MustGetProperty(targetInstance, "ProcessId").Val),
 				Name:        oleutil.MustGetProperty(targetInstance, "Name").ToString(),
 				CommandLine: oleutil.MustGetProperty(targetInstance, "CommandLine").ToString(),
@@ -113,8 +113,8 @@ func monitorProcesses(eventClass string) (<-chan Win32Process, <-chan error) {
 }
 
 // Функция для мониторинга Evtx
-func MonitorEvtx() (<-chan Win32NTLogEvent, <-chan error) {
-	logCh := make(chan Win32NTLogEvent)
+func MonitorEvtx() (<-chan Win32_NTLogEvent, <-chan error) {
+	logCh := make(chan Win32_NTLogEvent)
 	errorCh := make(chan error)
 
 	go func() {
@@ -177,7 +177,7 @@ func MonitorEvtx() (<-chan Win32NTLogEvent, <-chan error) {
 			targetInstance := targetInstanceRaw.ToIDispatch()
 			defer targetInstance.Release()
 
-			logEvent := Win32NTLogEvent{
+			logEvent := Win32_NTLogEvent{
 				EventID:          int32(oleutil.MustGetProperty(targetInstance, "EventCode").Val),
 				Logfile:          safeGetStringProperty(targetInstance, "Logfile"),
 				Message:          safeGetStringProperty(targetInstance, "Message"),
