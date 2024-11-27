@@ -8,6 +8,7 @@ import (
 	"net"
 	"time"
 
+	_ "github.com/go-sql-driver/mysql"
 	handler "github.com/imyazip/GoSIEM/log-storage/internal/server"
 	"github.com/imyazip/GoSIEM/log-storage/internal/service"
 	"github.com/imyazip/GoSIEM/log-storage/internal/storage"

@@ -1,5 +1,5 @@
 database:
-  host: mysql  # Имя сервиса в Docker Compose
+  host: mysql-auth  # Имя сервиса в Docker Compose
   port: 3306
   user: auth_user
   password: auth_password
