@@ -41,6 +41,17 @@ func (h *AuthAPI) GenerateJWTForSensor(ctx context.Context, req *pb.GenerateJWTF
 	}, nil
 }
 
+func (h *AuthAPI) ValidateJWTForSensor(ctx context.Context, req *pb.ValidateJWTForSensorRequest) (*pb.ValidateJWTForSensorResponse, error) {
+	valid, err := h.service.ValidateAPIJWT(ctx, req.JWT)
+	if err != nil {
+		return nil, err
+	}
+
+	return &pb.ValidateJWTForSensorResponse{
+		Valid: valid,
+	}, nil
+}
+
 func (h *AuthAPI) CreateUser(ctx context.Context, req *pb.CreateUserRequest) (*pb.CreateUserResponse, error) {
 	err := h.service.CreateNewUser(ctx, req.Username, req.Password, req.Role)
 	if err != nil {

@@ -1,0 +1,14 @@
+database:
+  host: mysql-log  # Имя сервиса в Docker Compose
+  port: 3306
+  user: log_user
+  password: log_password
+  name: log_db
+
+server:
+  host: "0.0.0.0"
+  port: 50052
+
+authServer:
+  host: "auth-server"
+  port: 50051  
