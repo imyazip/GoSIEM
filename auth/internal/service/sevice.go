@@ -77,7 +77,7 @@ func (s *AuthService) CreateNewUser(ctx context.Context, username string, passwo
 	// Извлекаем метаданные из контекста для проверки jwt токена
 	md, ok := metadata.FromIncomingContext(ctx)
 	if !ok {
-		log.Printf("failed to get metadata")
+		log.Printf("failed to get context metadata")
 		return errors.New("failed to get metadata")
 	}
 
