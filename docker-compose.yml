@@ -78,7 +78,8 @@ services:
     volumes:
       - ./nginx.conf:/etc/nginx/nginx.conf
     depends_on:
-      - auth-server  # Убедимся, что NGINX запускается после auth-service  # Прокси-конфигурация NGINX
+      - auth-server  
+      - log-server
 
 
 # Определяем том для хранения данных MySQL

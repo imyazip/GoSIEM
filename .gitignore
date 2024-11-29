@@ -4,3 +4,4 @@ windows_agent/agent.exe
 auth/proto/
 log_storage/proto/
 windows_agent/proto
+log_storage/tests

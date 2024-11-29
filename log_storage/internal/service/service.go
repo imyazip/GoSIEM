@@ -4,12 +4,15 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	log "fmt"
+	"strings"
 
 	"github.com/imyazip/GoSIEM/log-storage/internal/storage"
 	"github.com/imyazip/GoSIEM/log-storage/pkg/config"
 	pb "github.com/imyazip/GoSIEM/log-storage/proto"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
+	"google.golang.org/grpc/metadata"
 )
 
 type LogService struct {
@@ -19,10 +22,14 @@ type LogService struct {
 }
 
 func NewLogService(db *storage.Storage, config config.Config) *LogService {
-	authServAddr := fmt.Sprintf("%s:%d", config.AuthServer.Host, config.AuthServer.Port)
+	if config.AuthServer.Port == 0 {
+		panic(log.Sprintf("Invalid port number for Auth service: %d", config.AuthServer.Port))
+	}
+	authServAddr := log.Sprintf("%s:%d", config.AuthServer.Host, config.AuthServer.Port)
+	log.Printf("Connecting to auth srv: %s", authServAddr)
 	conn, err := grpc.NewClient(authServAddr, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
-		panic(fmt.Sprint("failed to connect to auth service:", authServAddr))
+		panic(log.Sprint("failed to connect to auth service:", authServAddr))
 	}
 
 	authClient := pb.NewAuthServiceClient(conn)
@@ -35,14 +42,30 @@ func NewLogService(db *storage.Storage, config config.Config) *LogService {
 }
 
 func (s *LogService) ValidateJWT(ctx context.Context) (bool, error) {
-	jwt, ok := ctx.Value("jwt").(string)
-	if !ok || jwt == "" {
+	// Получаем метаданные из контекста
+	md, ok := metadata.FromIncomingContext(ctx)
+	if !ok {
+		return false, fmt.Errorf("missing metadata in context")
+	}
+
+	// Получаем значение из заголовка "authorization"
+	authHeader := md.Get("authorization")
+	if len(authHeader) == 0 {
 		return false, fmt.Errorf("missing JWT token")
 	}
 
-	resp, err := s.authClient.ValidateJWTKey(ctx, &pb.ValidateJWTKeyRequest{JWT: jwt})
+	// Проверяем, что строка начинается с "Bearer "
+	if !strings.HasPrefix(authHeader[0], "Bearer ") {
+		return false, fmt.Errorf("invalid token format")
+	}
+
+	// Извлекаем сам токен (удаляем "Bearer " префикс)
+	token := strings.TrimPrefix(authHeader[0], "Bearer ")
+
+	// Проверяем валидность JWT через authClient
+	resp, err := s.authClient.ValidateJWTForSensor(ctx, &pb.ValidateJWTForSensorRequest{JWT: token})
 	if err != nil {
-		return false, fmt.Errorf("failed to validate JWT: %w", err)
+		return false, fmt.Errorf("failed to validate JWT: %v", err)
 	}
 
 	if !resp.Valid {
@@ -61,7 +84,7 @@ func (s *LogService) SaveRawLog(ctx context.Context, req *pb.TransferRawStringLo
 func (s *LogService) SaveSerializedLog(ctx context.Context, req *pb.TranserSerializedLogRequest) error {
 	serializedData, err := json.Marshal(req.LogSerialized)
 	if err != nil {
-		return fmt.Errorf("failed to serialize log data: %w", err)
+		return log.Errorf("failed to serialize log data: %w", err)
 	}
 	return s.storage.InsertSerializedLog(req.LogSource, string(serializedData), req.SystemCreatedAt.AsTime(), req.SensorId)
 }

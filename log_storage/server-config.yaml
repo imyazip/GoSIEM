@@ -10,5 +10,5 @@ server:
   port: 50052
 
 authServer:
-  authHost: "0.0.0.0"
-  authPort: 50051
+  host: "auth-server"
+  port: 50051  

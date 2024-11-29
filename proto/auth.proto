@@ -7,7 +7,7 @@ import "google/protobuf/timestamp.proto";
 // Сервис авторизации
 service AuthService {
     // API для сенсоров
-    rpc ValidateJWTKey (ValidateJWTKeyRequest) returns (ValidateJWTKeyResponse);
+    rpc ValidateJWTForSensor (ValidateJWTForSensorRequest) returns (ValidateJWTForSensorResponse);
     rpc GenerateJWTForSensor (GenerateJWTForSensorRequest) returns (GenerateJWTForSensorResponse); // Реализовано
 
     // API для пользователей
@@ -37,14 +37,13 @@ service LogStorageService {
 /////////////////////////
 
 // Запрос для проверки API-ключа
-message ValidateJWTKeyRequest {
+message ValidateJWTForSensorRequest {
     string JWT = 1;
 }
 
 // Ответ для проверки API-ключа
-message ValidateJWTKeyResponse {
+message ValidateJWTForSensorResponse {
     bool valid = 1;
-    int64 sensor_id = 2;
 }
 
 // Запрос на получение JWT токена для сенсора

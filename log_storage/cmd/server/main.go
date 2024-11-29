@@ -12,13 +12,14 @@ import (
 	handler "github.com/imyazip/GoSIEM/log-storage/internal/server"
 	"github.com/imyazip/GoSIEM/log-storage/internal/service"
 	"github.com/imyazip/GoSIEM/log-storage/internal/storage"
-	"github.com/imyazip/GoSIEM/log-storage/middleware"
 	"github.com/imyazip/GoSIEM/log-storage/pkg/config"
 	pb "github.com/imyazip/GoSIEM/log-storage/proto"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/reflection"
 )
 
 func main() {
+	time.Sleep(15 * time.Second)
 	cfg := config.LoadConfig("server-config.yaml")
 	dsn := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s",
 		cfg.Database.User, cfg.Database.Password, cfg.Database.Host, cfg.Database.Port, cfg.Database.Name,
@@ -65,19 +66,20 @@ func main() {
 
 	address := fmt.Sprintf("%s:%d", cfg.Server.Host, cfg.Server.Port)
 
-	listener, err := net.Listen("tcp", address)
+	lis, err := net.Listen("tcp", address)
 	if err != nil {
-		log.Fatalf("Failed to listen: %v", err)
+		log.Fatalf("Failed to listen on %s: %v", address, err) // Логируем ошибку, если не удается слушать порт
 	}
 
-	grpcServer := grpc.NewServer(
-		grpc.UnaryInterceptor(middleware.JWTAuthInterceptor()),
-	)
+	// Создаем gRPC сервер
+	grpcServer := grpc.NewServer()
+
+	// Регистрируем наш сервис на сервере
 	pb.RegisterLogStorageServiceServer(grpcServer, logApi)
-
-	log.Println("LogStorageService is running on port: ", cfg.Server.Port)
-
-	if err := grpcServer.Serve(listener); err != nil {
-		log.Fatalf("Failed to serve: %v", err)
+	reflection.Register(grpcServer)
+	// Запускаем сервер
+	log.Printf("Server is running on %s", address)
+	if err := grpcServer.Serve(lis); err != nil {
+		log.Fatalf("Failed to serve: %v", err) // Логируем ошибку, если не удается запустить сервер
 	}
 }

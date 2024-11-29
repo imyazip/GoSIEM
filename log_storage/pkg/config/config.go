@@ -21,9 +21,9 @@ type Config struct {
 		Name     string `yaml:"name"`     // Имя базы данных
 	} `yaml:"database"`
 	AuthServer struct {
-		Host string `yaml:"authHost"` // Адрес сервера
-		Port int    `yaml:"authPort"` // Порт сервера
-	} `yaml:"AuthServer"`
+		Host string `yaml:"host"` // Адрес сервера
+		Port int    `yaml:"port"` // Порт сервера
+	} `yaml:"authServer"`
 }
 
 // Функция для загрузки конфигурации из YAML-файла

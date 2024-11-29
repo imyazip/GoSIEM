@@ -2,6 +2,7 @@ package server
 
 import (
 	"context"
+	"log"
 
 	"github.com/imyazip/GoSIEM/log-storage/internal/service"
 	pb "github.com/imyazip/GoSIEM/log-storage/proto"
@@ -29,7 +30,8 @@ func (h *LogStorageApi) TransferRawStringLog(ctx context.Context, req *pb.Transf
 	return &pb.TransferRawStringLogResponse{Success: true}, nil
 }
 
-func (h *LogStorageApi) TransferSerializedStringLog(ctx context.Context, req *pb.TranserSerializedLogRequest) (*pb.TranserSerializedLogResponse, error) {
+func (h *LogStorageApi) TranserSerializedLog(ctx context.Context, req *pb.TranserSerializedLogRequest) (*pb.TranserSerializedLogResponse, error) {
+	log.Println("Received request to TranserSerializedLog")
 	_, err := h.service.ValidateJWT(ctx)
 	if err != nil {
 		return &pb.TranserSerializedLogResponse{Success: false, Error: err.Error()}, nil

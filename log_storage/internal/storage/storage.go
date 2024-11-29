@@ -4,7 +4,6 @@ import (
 	"bufio"
 	"context"
 	"database/sql"
-	"fmt"
 	"log"
 	"os"
 	"path/filepath"
@@ -44,7 +43,8 @@ func (s *Storage) ExecuteMigrations(ctx context.Context, migrationsDir string) e
 	// Открываем директорию с миграциями
 	files, err := os.ReadDir(migrationsDir)
 	if err != nil {
-		return fmt.Errorf("failed to read migrations directory: %v", err)
+		log.Printf("failed to read migrations directory: %v", err)
+		return err
 	}
 
 	// Проходим по всем файлам в директории
@@ -57,7 +57,8 @@ func (s *Storage) ExecuteMigrations(ctx context.Context, migrationsDir string) e
 		filePath := filepath.Join(migrationsDir, file.Name())
 		migrationFile, err := os.Open(filePath)
 		if err != nil {
-			return fmt.Errorf("failed to open migration file %s: %v", filePath, err)
+			log.Printf("failed to open migration file %s: %v", filePath, err)
+			return err
 		}
 		defer migrationFile.Close()
 
@@ -82,14 +83,16 @@ func (s *Storage) ExecuteMigrations(ctx context.Context, migrationsDir string) e
 		}
 
 		if err := scanner.Err(); err != nil {
-			return fmt.Errorf("error reading migration file %s: %v", filePath, err)
+			log.Printf("error reading migration file %s: %v", filePath, err)
+			return err
 		}
 
 		// Выполняем каждый запрос из миграции
 		for _, query := range queries {
 			_, err := s.db.ExecContext(ctx, query)
 			if err != nil {
-				return fmt.Errorf("failed to execute query from migration file %s: %v", filePath, err)
+				log.Printf("failed to execute query from migration file %s: %v", filePath, err)
+				return err
 			}
 		}
 

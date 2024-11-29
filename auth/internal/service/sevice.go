@@ -64,6 +64,15 @@ func (s *AuthService) GenerateJWTFromAPIKey(ctx context.Context, apiKey string, 
 	return jwt.GenerateAPIJWT(s.config.JWT.SecretKey, sensor.Sensor_id, expirationTime)
 }
 
+func (s *AuthService) ValidateAPIJWT(ctx context.Context, token string) (bool, error) {
+	_, _, err := jwt.ValidateAPIJWT(token, s.config.JWT.SecretKey)
+	if err != nil {
+		log.Printf("Invalid jwt key given: %s", token)
+		return false, err
+	}
+	return true, nil
+}
+
 func (s *AuthService) CreateNewUser(ctx context.Context, username string, password string, roleID int64) error {
 	// Извлекаем метаданные из контекста для проверки jwt токена
 	md, ok := metadata.FromIncomingContext(ctx)
