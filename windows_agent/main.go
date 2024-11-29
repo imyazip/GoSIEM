@@ -3,7 +3,9 @@ package main
 import (
 	"fmt"
 	"log"
+	"time"
 
+	"github.com/briandowns/spinner"
 	"github.com/go-ole/go-ole"
 	"github.com/imyazip/GoSIEM/windows_agent/internal/pkg/api"
 	"github.com/imyazip/GoSIEM/windows_agent/internal/pkg/config"
@@ -12,6 +14,7 @@ import (
 )
 
 func main() {
+	utils.PrintWelcome()
 	cfg := config.LoadConfig("agent-config.yaml")
 	conn, err := api.ConnectToServer(fmt.Sprintf("%s:%d", cfg.Server.Host, cfg.Server.Port))
 	if err != nil {
@@ -21,11 +24,16 @@ func main() {
 	log.Printf("Connected to AuthService")
 	logClient := api.GetLogClient(conn)
 	log.Printf("Connected to LogService")
+	s := spinner.New(spinner.CharSets[9], 100*time.Millisecond)
+	s.Color("blue")
+	s.Suffix = " Getting JWT Token..."
+	s.Start()
 
 	token, err := api.GetToken(cfg.Api.Key, authClient)
 	if err != nil {
 		log.Fatalf("Failed to get token: %v", err)
 	}
+	s.Stop()
 
 	ctx := api.CreateAuthContext(token)
 
