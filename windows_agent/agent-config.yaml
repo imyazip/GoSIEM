@@ -1,0 +1,7 @@
+server:
+  host: "localhost"
+  port: 80
+
+api:
+  key: "api_key"
+
