@@ -1,22 +1,41 @@
 package main
 
 import (
-	"context"
 	"fmt"
 	"log"
+	"time"
 
+	"github.com/briandowns/spinner"
 	"github.com/go-ole/go-ole"
+	"github.com/imyazip/GoSIEM/windows_agent/internal/pkg/api"
+	"github.com/imyazip/GoSIEM/windows_agent/internal/pkg/config"
 	"github.com/imyazip/GoSIEM/windows_agent/internal/pkg/parser"
-	pb "github.com/imyazip/GoSIEM/windows_agent/proto"
-	"google.golang.org/grpc"
+	"github.com/imyazip/GoSIEM/windows_agent/internal/pkg/utils"
 )
 
 func main() {
-	apiKey := "api_key"
-	token, err := getToken(apiKey)
+	utils.PrintWelcome()
+	cfg := config.LoadConfig("agent-config.yaml")
+	conn, err := api.ConnectToServer(fmt.Sprintf("%s:%d", cfg.Server.Host, cfg.Server.Port))
+	if err != nil {
+		log.Fatal(err.Error())
+	}
+	authClient := api.GetAuthClient(conn)
+	log.Printf("Connected to AuthService")
+	logClient := api.GetLogClient(conn)
+	log.Printf("Connected to LogService")
+	s := spinner.New(spinner.CharSets[9], 100*time.Millisecond)
+	s.Color("blue")
+	s.Suffix = " Getting JWT Token..."
+	s.Start()
+
+	token, err := api.GetToken(cfg.Api.Key, authClient)
 	if err != nil {
 		log.Fatalf("Failed to get token: %v", err)
 	}
+	s.Stop()
+
+	ctx := api.CreateAuthContext(token)
 
 	// Выводим полученный токен
 	fmt.Printf("Received token: %s\n", token)
@@ -28,7 +47,7 @@ func main() {
 	}
 	defer ole.CoUninitialize()
 
-	// Запуск мониторинга создания процессов
+	/* Запуск мониторинга создания процессов
 	go func() {
 		processCreatedCh, processErrorCh := parser.MonitorProcessCreation()
 		for {
@@ -57,19 +76,15 @@ func main() {
 			}
 		}
 	}()
-
+	*/
 	//Запуск мониторинга evtx
 	go func() {
 		logCh, logErrCh := parser.MonitorEvtx()
 		for {
 			select {
 			case logEvent := <-logCh:
-				//fmt.Printf("[Log Event - %s]\n", logEvent.InsertionStrings)
-				fmt.Println(logEvent.EventID)
-				fmt.Println(logEvent.Message)
-				for i, value := range logEvent.InsertionStrings {
-					fmt.Println(i, ": [", value, "]")
-				}
+				serialized := utils.StructToSlice(logEvent)
+				api.SendSerializedLog(ctx, serialized, "sensor", "evtx", logClient)
 			case err := <-logErrCh:
 				if err != nil {
 					fmt.Printf("[Error - Log Event - %s]\n", err)
@@ -79,30 +94,4 @@ func main() {
 	}()
 
 	select {}
-}
-
-// Функция для получения токена
-func getToken(apiKey string) (string, error) {
-	// Создаем соединение с gRPC сервером
-	conn, err := grpc.Dial("localhost:80", grpc.WithInsecure()) // Замените на актуальный адрес
-	if err != nil {
-		return "", fmt.Errorf("did not connect: %v", err)
-	}
-	defer conn.Close()
-
-	// Создаем клиент для сервиса
-	client := pb.NewAuthServiceClient(conn)
-
-	// Создаем запрос с API-ключом
-	req := &pb.GenerateJWTForSensorRequest{
-		ApiKey: apiKey,
-	}
-
-	// Отправляем запрос и получаем ответ
-	res, err := client.GenerateJWTForSensor(context.Background(), req)
-	if err != nil {
-		return "", fmt.Errorf("error during request: %v", err)
-	}
-
-	return res.Token, nil
 }
