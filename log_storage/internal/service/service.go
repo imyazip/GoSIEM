@@ -2,7 +2,6 @@ package service
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	log "fmt"
 	"strings"
@@ -13,6 +12,7 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/metadata"
+	"google.golang.org/protobuf/proto"
 )
 
 type LogService struct {
@@ -82,9 +82,11 @@ func (s *LogService) SaveRawLog(ctx context.Context, req *pb.TransferRawStringLo
 
 // SaveSerializedLog сохраняет сериализованные логи в базу
 func (s *LogService) SaveSerializedLog(ctx context.Context, req *pb.TranserSerializedLogRequest) error {
-	serializedData, err := json.Marshal(req.LogSerialized)
+	SerializedLogsArray := &pb.StringArray{Items: req.LogSerialized} //Создаем вспомогательную структуру для сериализации массива из сообщения TranserSerializedLogRequest
+
+	serializedData, err := proto.Marshal(SerializedLogsArray) //Конвертируем в бинарный формат
 	if err != nil {
 		return log.Errorf("failed to serialize log data: %w", err)
 	}
-	return s.storage.InsertSerializedLog(req.LogSource, string(serializedData), req.SystemCreatedAt.AsTime(), req.SensorId)
+	return s.storage.InsertSerializedLog(req.LogSource, serializedData, req.SystemCreatedAt.AsTime(), req.SensorId)
 }

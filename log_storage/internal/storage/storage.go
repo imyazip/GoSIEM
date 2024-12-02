@@ -29,7 +29,7 @@ func (s *Storage) InsertRawLog(source string, logString string, createdAt time.T
 	return nil
 }
 
-func (s *Storage) InsertSerializedLog(source string, logSerialized string, createdAt time.Time, sensorId string) error {
+func (s *Storage) InsertSerializedLog(source string, logSerialized []byte, createdAt time.Time, sensorId string) error {
 	query := `INSERT INTO serialized_logs (log_source, log_serialized, created_at_system, sensor_id) VALUES (?, ?, ?, ?)`
 	_, err := s.db.Exec(query, source, logSerialized, createdAt, sensorId)
 	if err != nil {
