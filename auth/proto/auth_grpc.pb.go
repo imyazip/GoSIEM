@@ -480,6 +480,7 @@ const (
 	LogStorageService_TransferRawStringLog_FullMethodName = "/auth.LogStorageService/TransferRawStringLog"
 	LogStorageService_TranserSerializedLog_FullMethodName = "/auth.LogStorageService/TranserSerializedLog"
 	LogStorageService_GetNewLogs_FullMethodName           = "/auth.LogStorageService/GetNewLogs"
+	LogStorageService_AddSecurityEvent_FullMethodName     = "/auth.LogStorageService/AddSecurityEvent"
 )
 
 // LogStorageServiceClient is the client API for LogStorageService service.
@@ -489,6 +490,7 @@ type LogStorageServiceClient interface {
 	TransferRawStringLog(ctx context.Context, in *TransferRawStringLogRequest, opts ...grpc.CallOption) (*TransferRawStringLogResponse, error)
 	TranserSerializedLog(ctx context.Context, in *TranserSerializedLogRequest, opts ...grpc.CallOption) (*TranserSerializedLogResponse, error)
 	GetNewLogs(ctx context.Context, in *GetNewLogsRequest, opts ...grpc.CallOption) (*GetNewLogsResponse, error)
+	AddSecurityEvent(ctx context.Context, in *AddSecurityEventRequest, opts ...grpc.CallOption) (*AddSecurityEventResponse, error)
 }
 
 type logStorageServiceClient struct {
@@ -529,6 +531,16 @@ func (c *logStorageServiceClient) GetNewLogs(ctx context.Context, in *GetNewLogs
 	return out, nil
 }
 
+func (c *logStorageServiceClient) AddSecurityEvent(ctx context.Context, in *AddSecurityEventRequest, opts ...grpc.CallOption) (*AddSecurityEventResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(AddSecurityEventResponse)
+	err := c.cc.Invoke(ctx, LogStorageService_AddSecurityEvent_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // LogStorageServiceServer is the server API for LogStorageService service.
 // All implementations must embed UnimplementedLogStorageServiceServer
 // for forward compatibility.
@@ -536,6 +548,7 @@ type LogStorageServiceServer interface {
 	TransferRawStringLog(context.Context, *TransferRawStringLogRequest) (*TransferRawStringLogResponse, error)
 	TranserSerializedLog(context.Context, *TranserSerializedLogRequest) (*TranserSerializedLogResponse, error)
 	GetNewLogs(context.Context, *GetNewLogsRequest) (*GetNewLogsResponse, error)
+	AddSecurityEvent(context.Context, *AddSecurityEventRequest) (*AddSecurityEventResponse, error)
 	mustEmbedUnimplementedLogStorageServiceServer()
 }
 
@@ -554,6 +567,9 @@ func (UnimplementedLogStorageServiceServer) TranserSerializedLog(context.Context
 }
 func (UnimplementedLogStorageServiceServer) GetNewLogs(context.Context, *GetNewLogsRequest) (*GetNewLogsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetNewLogs not implemented")
+}
+func (UnimplementedLogStorageServiceServer) AddSecurityEvent(context.Context, *AddSecurityEventRequest) (*AddSecurityEventResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method AddSecurityEvent not implemented")
 }
 func (UnimplementedLogStorageServiceServer) mustEmbedUnimplementedLogStorageServiceServer() {}
 func (UnimplementedLogStorageServiceServer) testEmbeddedByValue()                           {}
@@ -630,6 +646,24 @@ func _LogStorageService_GetNewLogs_Handler(srv interface{}, ctx context.Context,
 	return interceptor(ctx, in, info, handler)
 }
 
+func _LogStorageService_AddSecurityEvent_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(AddSecurityEventRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(LogStorageServiceServer).AddSecurityEvent(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: LogStorageService_AddSecurityEvent_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(LogStorageServiceServer).AddSecurityEvent(ctx, req.(*AddSecurityEventRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // LogStorageService_ServiceDesc is the grpc.ServiceDesc for LogStorageService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -648,6 +682,10 @@ var LogStorageService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetNewLogs",
 			Handler:    _LogStorageService_GetNewLogs_Handler,
+		},
+		{
+			MethodName: "AddSecurityEvent",
+			Handler:    _LogStorageService_AddSecurityEvent_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

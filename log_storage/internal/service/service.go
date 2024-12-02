@@ -6,6 +6,7 @@ import (
 	log "fmt"
 	"strings"
 
+	"github.com/imyazip/GoSIEM/log-storage/internal/models"
 	"github.com/imyazip/GoSIEM/log-storage/internal/storage"
 	"github.com/imyazip/GoSIEM/log-storage/pkg/config"
 	pb "github.com/imyazip/GoSIEM/log-storage/proto"
@@ -100,5 +101,22 @@ func (s *LogService) GetNewLogs(ctx context.Context, req *pb.GetNewLogsRequest) 
 
 	return &pb.GetNewLogsResponse{
 		Logs: logs,
+	}, nil
+}
+
+func (s *LogService) AddSecurityEvent(ctx context.Context, req *pb.AddSecurityEventRequest) (*pb.AddSecurityEventResponse, error) {
+	event := models.SecurityEvent{
+		LogID:            int32(req.LogId),
+		EventType:        req.EventType,
+		EventDescription: req.EventDescription,
+	}
+
+	err := s.storage.AddSecurityEvent(ctx, event)
+	if err != nil {
+		log.Print("Ошибка при добавлении события безопасности")
+		return nil, err
+	}
+	return &pb.AddSecurityEventResponse{
+		Success: true,
 	}, nil
 }

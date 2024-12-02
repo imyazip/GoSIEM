@@ -52,3 +52,12 @@ func (h *LogStorageApi) GetNewLogs(ctx context.Context, req *pb.GetNewLogsReques
 
 	return answer, nil
 }
+
+func (h *LogStorageApi) AddSecurityEvent(ctx context.Context, req *pb.AddSecurityEventRequest) (*pb.AddSecurityEventResponse, error) {
+	answer, err := h.service.AddSecurityEvent(ctx, req)
+	if err != nil {
+		return nil, err
+	}
+
+	return answer, nil
+}

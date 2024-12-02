@@ -10,6 +10,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/imyazip/GoSIEM/log-storage/internal/models"
 	pb "github.com/imyazip/GoSIEM/log-storage/proto"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
@@ -80,6 +81,17 @@ func (s *Storage) GetNewLogs(ctx context.Context, limit int32) ([]*pb.LogEntry, 
 	}
 
 	return logs, nil
+}
+
+func (s *Storage) AddSecurityEvent(ctx context.Context, event models.SecurityEvent) error {
+	query := `INSERT INTO security_events (log_id, event_type, event_description)
+        VALUES (?, ?, ?)`
+	_, err := s.db.Exec(query, event.LogID, event.EventType, event.EventDescription)
+	if err != nil {
+		log.Printf("Ошибка при добавлении события: %v", err)
+		return err
+	}
+	return nil
 }
 
 func (s *Storage) ExecuteMigrations(ctx context.Context, migrationsDir string) error {
