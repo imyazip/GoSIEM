@@ -30,6 +30,8 @@ service AuthService {
 service LogStorageService {
     rpc TransferRawStringLog (TransferRawStringLogRequest) returns (TransferRawStringLogResponse);
     rpc TranserSerializedLog (TranserSerializedLogRequest) returns (TranserSerializedLogResponse);
+    
+    rpc GetNewLogs (GetNewLogsRequest) returns (GetNewLogsResponse);
 }
 
 /////////////////////////
@@ -187,3 +189,20 @@ message TranserSerializedLogResponse {
 message StringArray {
     repeated string items = 1;
 }
+
+message LogEntry {
+    int64 id = 1;
+    string log_source = 2;
+    bytes log_serialized = 3;
+    google.protobuf.Timestamp system_created_at = 4;
+    string sensor_id = 5;
+}
+
+message GetNewLogsRequest {
+    int32 limit = 1;
+}
+
+message GetNewLogsResponse {
+    repeated LogEntry logs = 1;
+}
+  
