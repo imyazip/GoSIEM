@@ -4,7 +4,8 @@ CREATE TABLE IF NOT EXISTS raw_logs (
     log_string TEXT NOT NULL,
     created_at_system DATETIME NOT NULL,
     sensor_id VARCHAR(255) NOT NULL,
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    read_flag BOOLEAN DEFAULT FALSE
 );
 
 CREATE TABLE IF NOT EXISTS serialized_logs (
@@ -13,5 +14,6 @@ CREATE TABLE IF NOT EXISTS serialized_logs (
     log_serialized BLOB NOT NULL, 
     created_at_system DATETIME NOT NULL,
     sensor_id VARCHAR(255) NOT NULL,
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    read_flag BOOLEAN DEFAULT FALSE
 );

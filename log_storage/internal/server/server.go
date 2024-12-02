@@ -43,3 +43,12 @@ func (h *LogStorageApi) TranserSerializedLog(ctx context.Context, req *pb.Transe
 
 	return &pb.TranserSerializedLogResponse{Success: true}, nil
 }
+
+func (h *LogStorageApi) GetNewLogs(ctx context.Context, req *pb.GetNewLogsRequest) (*pb.GetNewLogsResponse, error) {
+	answer, err := h.service.GetNewLogs(ctx, req)
+	if err != nil {
+		return nil, err
+	}
+
+	return answer, nil
+}

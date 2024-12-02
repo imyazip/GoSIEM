@@ -9,6 +9,9 @@ import (
 	"path/filepath"
 	"strings"
 	"time"
+
+	pb "github.com/imyazip/GoSIEM/log-storage/proto"
+	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 type Storage struct {
@@ -37,6 +40,46 @@ func (s *Storage) InsertSerializedLog(source string, logSerialized []byte, creat
 	}
 
 	return nil
+}
+
+func (s *Storage) GetNewLogs(ctx context.Context, limit int32) ([]*pb.LogEntry, error) {
+	rows, err := s.db.Query(`
+		SELECT id, log_source, log_serialized, system_created_at, sensor_id
+		FROM logs
+		WHERE read_flag = FALSE
+		LIMIT ?`, limit)
+	if err != nil {
+		return nil, err
+	}
+
+	defer rows.Close()
+	var logs []*pb.LogEntry
+	for rows.Next() {
+		var id int
+		var logSource, sensorID string
+		var serializedData []byte
+		var systemCreatedAt time.Time
+
+		if err := rows.Scan(&id, &logSource, &serializedData, &systemCreatedAt, &sensorID); err != nil {
+			return nil, err
+		}
+
+		logs = append(logs, &pb.LogEntry{
+			Id:              int64(id),
+			LogSource:       logSource,
+			LogSerialized:   serializedData,
+			SystemCreatedAt: timestamppb.New(time.Time(systemCreatedAt)),
+			SensorId:        sensorID,
+		})
+
+		// Помечаем лог как обработанный
+		_, err := s.db.Exec("UPDATE logs SET read_flag = TRUE WHERE id = ?", id)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	return logs, nil
 }
 
 func (s *Storage) ExecuteMigrations(ctx context.Context, migrationsDir string) error {

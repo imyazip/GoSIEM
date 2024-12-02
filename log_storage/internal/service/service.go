@@ -90,3 +90,15 @@ func (s *LogService) SaveSerializedLog(ctx context.Context, req *pb.TranserSeria
 	}
 	return s.storage.InsertSerializedLog(req.LogSource, serializedData, req.SystemCreatedAt.AsTime(), req.SensorId)
 }
+
+func (s *LogService) GetNewLogs(ctx context.Context, req *pb.GetNewLogsRequest) (*pb.GetNewLogsResponse, error) {
+
+	logs, err := s.storage.GetNewLogs(ctx, req.GetLimit())
+	if err != nil {
+		return nil, log.Errorf("ошибка при получении логов: %v", err)
+	}
+
+	return &pb.GetNewLogsResponse{
+		Logs: logs,
+	}, nil
+}

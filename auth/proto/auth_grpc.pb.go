@@ -479,6 +479,7 @@ var AuthService_ServiceDesc = grpc.ServiceDesc{
 const (
 	LogStorageService_TransferRawStringLog_FullMethodName = "/auth.LogStorageService/TransferRawStringLog"
 	LogStorageService_TranserSerializedLog_FullMethodName = "/auth.LogStorageService/TranserSerializedLog"
+	LogStorageService_GetNewLogs_FullMethodName           = "/auth.LogStorageService/GetNewLogs"
 )
 
 // LogStorageServiceClient is the client API for LogStorageService service.
@@ -487,6 +488,7 @@ const (
 type LogStorageServiceClient interface {
 	TransferRawStringLog(ctx context.Context, in *TransferRawStringLogRequest, opts ...grpc.CallOption) (*TransferRawStringLogResponse, error)
 	TranserSerializedLog(ctx context.Context, in *TranserSerializedLogRequest, opts ...grpc.CallOption) (*TranserSerializedLogResponse, error)
+	GetNewLogs(ctx context.Context, in *GetNewLogsRequest, opts ...grpc.CallOption) (*GetNewLogsResponse, error)
 }
 
 type logStorageServiceClient struct {
@@ -517,12 +519,23 @@ func (c *logStorageServiceClient) TranserSerializedLog(ctx context.Context, in *
 	return out, nil
 }
 
+func (c *logStorageServiceClient) GetNewLogs(ctx context.Context, in *GetNewLogsRequest, opts ...grpc.CallOption) (*GetNewLogsResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetNewLogsResponse)
+	err := c.cc.Invoke(ctx, LogStorageService_GetNewLogs_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // LogStorageServiceServer is the server API for LogStorageService service.
 // All implementations must embed UnimplementedLogStorageServiceServer
 // for forward compatibility.
 type LogStorageServiceServer interface {
 	TransferRawStringLog(context.Context, *TransferRawStringLogRequest) (*TransferRawStringLogResponse, error)
 	TranserSerializedLog(context.Context, *TranserSerializedLogRequest) (*TranserSerializedLogResponse, error)
+	GetNewLogs(context.Context, *GetNewLogsRequest) (*GetNewLogsResponse, error)
 	mustEmbedUnimplementedLogStorageServiceServer()
 }
 
@@ -538,6 +551,9 @@ func (UnimplementedLogStorageServiceServer) TransferRawStringLog(context.Context
 }
 func (UnimplementedLogStorageServiceServer) TranserSerializedLog(context.Context, *TranserSerializedLogRequest) (*TranserSerializedLogResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method TranserSerializedLog not implemented")
+}
+func (UnimplementedLogStorageServiceServer) GetNewLogs(context.Context, *GetNewLogsRequest) (*GetNewLogsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetNewLogs not implemented")
 }
 func (UnimplementedLogStorageServiceServer) mustEmbedUnimplementedLogStorageServiceServer() {}
 func (UnimplementedLogStorageServiceServer) testEmbeddedByValue()                           {}
@@ -596,6 +612,24 @@ func _LogStorageService_TranserSerializedLog_Handler(srv interface{}, ctx contex
 	return interceptor(ctx, in, info, handler)
 }
 
+func _LogStorageService_GetNewLogs_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetNewLogsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(LogStorageServiceServer).GetNewLogs(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: LogStorageService_GetNewLogs_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(LogStorageServiceServer).GetNewLogs(ctx, req.(*GetNewLogsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // LogStorageService_ServiceDesc is the grpc.ServiceDesc for LogStorageService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -610,6 +644,10 @@ var LogStorageService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "TranserSerializedLog",
 			Handler:    _LogStorageService_TranserSerializedLog_Handler,
+		},
+		{
+			MethodName: "GetNewLogs",
+			Handler:    _LogStorageService_GetNewLogs_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
