@@ -183,3 +183,7 @@ message TranserSerializedLogResponse {
     bool success = 1;
     string error = 2;
 }
+
+message StringArray {
+    repeated string items = 1;
+}
