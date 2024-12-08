@@ -45,8 +45,8 @@ func (s *Storage) InsertSerializedLog(source string, logSerialized []byte, creat
 
 func (s *Storage) GetNewLogs(ctx context.Context, limit int32) ([]*pb.LogEntry, error) {
 	rows, err := s.db.Query(`
-		SELECT id, log_source, log_serialized, system_created_at, sensor_id
-		FROM logs
+		SELECT id, log_source, log_serialized, DATE_FORMAT(created_at_system, '%Y-%m-%dT%H:%i:%sZ') AS created_at_system, sensor_id
+		FROM serialized_logs
 		WHERE read_flag = FALSE
 		LIMIT ?`, limit)
 	if err != nil {
@@ -59,9 +59,13 @@ func (s *Storage) GetNewLogs(ctx context.Context, limit int32) ([]*pb.LogEntry, 
 		var id int
 		var logSource, sensorID string
 		var serializedData []byte
-		var systemCreatedAt time.Time
+		var systemCreatedAt string
 
 		if err := rows.Scan(&id, &logSource, &serializedData, &systemCreatedAt, &sensorID); err != nil {
+			return nil, err
+		}
+		createdAt, err := time.Parse(time.RFC3339, systemCreatedAt)
+		if err != nil {
 			return nil, err
 		}
 
@@ -69,12 +73,12 @@ func (s *Storage) GetNewLogs(ctx context.Context, limit int32) ([]*pb.LogEntry, 
 			Id:              int64(id),
 			LogSource:       logSource,
 			LogSerialized:   serializedData,
-			SystemCreatedAt: timestamppb.New(time.Time(systemCreatedAt)),
+			SystemCreatedAt: timestamppb.New(time.Time(createdAt)),
 			SensorId:        sensorID,
 		})
 
 		// Помечаем лог как обработанный
-		_, err := s.db.Exec("UPDATE logs SET read_flag = TRUE WHERE id = ?", id)
+		_, err = s.db.Exec("UPDATE serialized_logs SET read_flag = TRUE WHERE id = ?", id)
 		if err != nil {
 			return nil, err
 		}

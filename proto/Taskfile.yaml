@@ -14,5 +14,6 @@ tasks:
       - protoc *.proto --go_out=../log_storage/proto --go_opt=paths=source_relative --go-grpc_out=../log_storage/proto  --go-grpc_opt=paths=source_relative
       - protoc *.proto --go_out=../log_storage/tests/serialized_test/proto --go_opt=paths=source_relative --go-grpc_out=../log_storage/tests/serialized_test/proto  --go-grpc_opt=paths=source_relative
       - protoc *.proto --go_out=../windows_agent/proto --go_opt=paths=source_relative --go-grpc_out=../windows_agent/proto  --go-grpc_opt=paths=source_relative
+      - protoc *.proto --go_out=../log_analyze --go_opt=paths=source_relative --go-grpc_out=../log_analyze/proto  --go-grpc_opt=paths=source_relative
 
 
