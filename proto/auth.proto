@@ -32,6 +32,7 @@ service LogStorageService {
     rpc TranserSerializedLog (TranserSerializedLogRequest) returns (TranserSerializedLogResponse);
     
     rpc GetNewLogs (GetNewLogsRequest) returns (GetNewLogsResponse);
+    rpc GetRules (GetRulesRequest) returns (GetRulesResponse);
     rpc AddSecurityEvent(AddSecurityEventRequest) returns (AddSecurityEventResponse);
 }
 
@@ -215,4 +216,12 @@ message AddSecurityEventRequest{
 
 message AddSecurityEventResponse {
     bool success = 1;
+}
+
+message GetRulesRequest {
+    int64 analyzer_id = 1;
+}
+
+message GetRulesResponse {
+    repeated string rules = 1;
 }
