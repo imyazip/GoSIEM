@@ -8,6 +8,7 @@ import (
 
 	"github.com/imyazip/GoSIEM/log_analzye/config"
 	pb "github.com/imyazip/GoSIEM/log_analzye/proto"
+	"github.com/imyazip/sigolyze"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/protobuf/proto"
@@ -36,6 +37,9 @@ func main() {
 
 	client := pb.NewLogStorageServiceClient(conn)
 
+	compiler := sigolyze.NewCompiler()
+	compiler.LoadSignatureFromJson("./signatures/sig.json")
+
 	for {
 		req := &pb.GetNewLogsRequest{
 			Limit: 10,
@@ -52,7 +56,12 @@ func main() {
 			}
 
 			for _, logContains := range deserialized.Items {
-				log.Print(logContains)
+				//log.Print(logContains)
+				matches := sigolyze.Match(compiler, logContains)
+				if len(matches) != 0 {
+					log.Printf("Matched with signature: %s", matches[0].Name)
+				}
+
 			}
 		}
 		time.Sleep(10 * time.Second)
