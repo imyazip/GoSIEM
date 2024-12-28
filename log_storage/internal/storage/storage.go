@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"context"
 	"database/sql"
+	"fmt"
 	"log"
 	"os"
 	"path/filepath"
@@ -88,9 +89,9 @@ func (s *Storage) GetNewLogs(ctx context.Context, limit int32) ([]*pb.LogEntry, 
 }
 
 func (s *Storage) AddSecurityEvent(ctx context.Context, event models.SecurityEvent) error {
-	query := `INSERT INTO security_events (log_id, event_type, event_description)
-        VALUES (?, ?, ?)`
-	_, err := s.db.Exec(query, event.LogID, event.EventType, event.EventDescription)
+	query := `INSERT INTO security_events ( event_type, event_description)
+        VALUES (?, ?)`
+	_, err := s.db.Exec(query, event.EventType, event.EventDescription)
 	if err != nil {
 		log.Printf("Ошибка при добавлении события: %v", err)
 		return err
@@ -159,4 +160,48 @@ func (s *Storage) ExecuteMigrations(ctx context.Context, migrationsDir string) e
 	}
 
 	return nil
+}
+
+func (s *Storage) AddRule(ctx context.Context, ruleJSON string) (int64, error) {
+	query := `INSERT INTO rules (rule) VALUES (?)`
+	result, err := s.db.ExecContext(ctx, query, ruleJSON)
+	if err != nil {
+		return 0, fmt.Errorf("failed to add rule: %w", err)
+	}
+
+	ruleID, err := result.LastInsertId()
+	if err != nil {
+		return 0, fmt.Errorf("failed to get inserted rule ID: %w", err)
+	}
+
+	return ruleID, nil
+}
+
+func (s *Storage) DeleteRule(ctx context.Context, ruleID int64) error {
+	query := `DELETE FROM rules WHERE id = ?`
+	_, err := s.db.ExecContext(ctx, query, ruleID)
+	if err != nil {
+		return fmt.Errorf("failed to delete rule with ID %d: %w", ruleID, err)
+	}
+	return nil
+}
+
+func (s *Storage) GetRules(ctx context.Context) ([]models.Rule, error) {
+	query := `SELECT id, rule FROM rules`
+	rows, err := s.db.QueryContext(ctx, query)
+	if err != nil {
+		return nil, fmt.Errorf("failed to query rules: %w", err)
+	}
+	defer rows.Close()
+
+	var rules []models.Rule
+	for rows.Next() {
+		var rule models.Rule
+		if err := rows.Scan(&rule.ID, &rule.JSON); err != nil {
+			return nil, fmt.Errorf("failed to scan rule: %w", err)
+		}
+		rules = append(rules, rule)
+	}
+
+	return rules, nil
 }

@@ -1,2 +1,5 @@
+SET FOREIGN_KEY_CHECKS = 0;
 DROP TABLE IF EXISTS raw_logs;
 DROP TABLE IF EXISTS serialized_logs;
+DROP TABLE IF EXISTS security_events;
+DROP TABLE IF EXISTS rules;

@@ -8,3 +8,8 @@ type SecurityEvent struct {
 	DetectedAt       string
 	CreatedAt        string
 }
+
+type Rule struct {
+	ID   int64  `json:"id"`
+	JSON string `json:"rule"`
+}

@@ -32,7 +32,10 @@ service LogStorageService {
     rpc TranserSerializedLog (TranserSerializedLogRequest) returns (TranserSerializedLogResponse);
     
     rpc GetNewLogs (GetNewLogsRequest) returns (GetNewLogsResponse);
+
+    rpc AddRule (AddRuleRequest) returns (AddRuleResponse);
     rpc GetRules (GetRulesRequest) returns (GetRulesResponse);
+
     rpc AddSecurityEvent(AddSecurityEventRequest) returns (AddSecurityEventResponse);
 }
 
@@ -218,10 +221,31 @@ message AddSecurityEventResponse {
     bool success = 1;
 }
 
-message GetRulesRequest {
-    int64 analyzer_id = 1;
+message AddRuleRequest {
+    string rule = 1; // JSON представление правила
 }
 
+message AddRuleResponse {
+    int64 rule_id = 1; // ID добавленного правила
+    string error = 2; // Ошибка в случае неудачи
+}
+
+message DeleteRuleRequest {
+    int64 rule_id = 1; // ID удаляемого правила
+}
+
+message DeleteRuleResponse {
+    bool success = 1; // Успех удаления
+    string message = 2; // Сообщение об ошибке или успешном удалении
+}
+
+message Rule {
+    int64 id = 1;     // Уникальный идентификатор правила
+    string rule = 2;  // JSON представление правила
+}
+
+message GetRulesRequest {}
+
 message GetRulesResponse {
-    repeated string rules = 1;
+    repeated Rule rules = 1; // Список правил
 }

@@ -60,6 +60,16 @@ func main() {
 				matches := sigolyze.Match(compiler, logContains)
 				if len(matches) != 0 {
 					log.Printf("Matched with signature: %s", matches[0].Name)
+					req := &pb.AddSecurityEventRequest{
+						LogId:            0,
+						EventType:        matches[0].Name,
+						EventDescription: "",
+					}
+
+					_, err := pb.LogStorageServiceClient.AddSecurityEvent(client, context.Background(), req)
+					if err != nil {
+						log.Printf("Error sending event: %s", err)
+					}
 				}
 
 			}

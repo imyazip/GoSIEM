@@ -120,3 +120,15 @@ func (s *LogService) AddSecurityEvent(ctx context.Context, req *pb.AddSecurityEv
 		Success: true,
 	}, nil
 }
+
+func (s *LogService) AddRule(ctx context.Context, ruleJSON string) (int64, error) {
+	return s.storage.AddRule(ctx, ruleJSON)
+}
+
+func (s *LogService) DeleteRule(ctx context.Context, ruleID int64) error {
+	return s.storage.DeleteRule(ctx, ruleID)
+}
+
+func (s *LogService) GetRules(ctx context.Context) ([]models.Rule, error) {
+	return s.storage.GetRules(ctx)
+}

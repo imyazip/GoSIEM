@@ -61,3 +61,36 @@ func (h *LogStorageApi) AddSecurityEvent(ctx context.Context, req *pb.AddSecurit
 
 	return answer, nil
 }
+
+func (h *LogStorageApi) AddRule(ctx context.Context, req *pb.AddRuleRequest) (*pb.AddRuleResponse, error) {
+	ruleID, err := h.service.AddRule(ctx, req.GetRule())
+	if err != nil {
+		return &pb.AddRuleResponse{Error: err.Error()}, nil
+	}
+	return &pb.AddRuleResponse{RuleId: ruleID}, nil
+}
+
+func (h *LogStorageApi) DeleteRule(ctx context.Context, req *pb.DeleteRuleRequest) (*pb.DeleteRuleResponse, error) {
+	err := h.service.DeleteRule(ctx, req.GetRuleId())
+	if err != nil {
+		return &pb.DeleteRuleResponse{Success: false, Message: err.Error()}, nil
+	}
+	return &pb.DeleteRuleResponse{Success: true}, nil
+}
+
+func (h *LogStorageApi) GetRules(ctx context.Context, req *pb.GetRulesRequest) (*pb.GetRulesResponse, error) {
+	rules, err := h.service.GetRules(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	var protoRules []*pb.Rule
+	for _, rule := range rules {
+		protoRules = append(protoRules, &pb.Rule{
+			Id:   rule.ID,
+			Rule: rule.JSON,
+		})
+	}
+
+	return &pb.GetRulesResponse{Rules: protoRules}, nil
+}

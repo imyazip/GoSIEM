@@ -480,6 +480,8 @@ const (
 	LogStorageService_TransferRawStringLog_FullMethodName = "/auth.LogStorageService/TransferRawStringLog"
 	LogStorageService_TranserSerializedLog_FullMethodName = "/auth.LogStorageService/TranserSerializedLog"
 	LogStorageService_GetNewLogs_FullMethodName           = "/auth.LogStorageService/GetNewLogs"
+	LogStorageService_AddRule_FullMethodName              = "/auth.LogStorageService/AddRule"
+	LogStorageService_GetRules_FullMethodName             = "/auth.LogStorageService/GetRules"
 	LogStorageService_AddSecurityEvent_FullMethodName     = "/auth.LogStorageService/AddSecurityEvent"
 )
 
@@ -490,6 +492,8 @@ type LogStorageServiceClient interface {
 	TransferRawStringLog(ctx context.Context, in *TransferRawStringLogRequest, opts ...grpc.CallOption) (*TransferRawStringLogResponse, error)
 	TranserSerializedLog(ctx context.Context, in *TranserSerializedLogRequest, opts ...grpc.CallOption) (*TranserSerializedLogResponse, error)
 	GetNewLogs(ctx context.Context, in *GetNewLogsRequest, opts ...grpc.CallOption) (*GetNewLogsResponse, error)
+	AddRule(ctx context.Context, in *AddRuleRequest, opts ...grpc.CallOption) (*AddRuleResponse, error)
+	GetRules(ctx context.Context, in *GetRulesRequest, opts ...grpc.CallOption) (*GetRulesResponse, error)
 	AddSecurityEvent(ctx context.Context, in *AddSecurityEventRequest, opts ...grpc.CallOption) (*AddSecurityEventResponse, error)
 }
 
@@ -531,6 +535,26 @@ func (c *logStorageServiceClient) GetNewLogs(ctx context.Context, in *GetNewLogs
 	return out, nil
 }
 
+func (c *logStorageServiceClient) AddRule(ctx context.Context, in *AddRuleRequest, opts ...grpc.CallOption) (*AddRuleResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(AddRuleResponse)
+	err := c.cc.Invoke(ctx, LogStorageService_AddRule_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *logStorageServiceClient) GetRules(ctx context.Context, in *GetRulesRequest, opts ...grpc.CallOption) (*GetRulesResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetRulesResponse)
+	err := c.cc.Invoke(ctx, LogStorageService_GetRules_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *logStorageServiceClient) AddSecurityEvent(ctx context.Context, in *AddSecurityEventRequest, opts ...grpc.CallOption) (*AddSecurityEventResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(AddSecurityEventResponse)
@@ -548,6 +572,8 @@ type LogStorageServiceServer interface {
 	TransferRawStringLog(context.Context, *TransferRawStringLogRequest) (*TransferRawStringLogResponse, error)
 	TranserSerializedLog(context.Context, *TranserSerializedLogRequest) (*TranserSerializedLogResponse, error)
 	GetNewLogs(context.Context, *GetNewLogsRequest) (*GetNewLogsResponse, error)
+	AddRule(context.Context, *AddRuleRequest) (*AddRuleResponse, error)
+	GetRules(context.Context, *GetRulesRequest) (*GetRulesResponse, error)
 	AddSecurityEvent(context.Context, *AddSecurityEventRequest) (*AddSecurityEventResponse, error)
 	mustEmbedUnimplementedLogStorageServiceServer()
 }
@@ -567,6 +593,12 @@ func (UnimplementedLogStorageServiceServer) TranserSerializedLog(context.Context
 }
 func (UnimplementedLogStorageServiceServer) GetNewLogs(context.Context, *GetNewLogsRequest) (*GetNewLogsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetNewLogs not implemented")
+}
+func (UnimplementedLogStorageServiceServer) AddRule(context.Context, *AddRuleRequest) (*AddRuleResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method AddRule not implemented")
+}
+func (UnimplementedLogStorageServiceServer) GetRules(context.Context, *GetRulesRequest) (*GetRulesResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetRules not implemented")
 }
 func (UnimplementedLogStorageServiceServer) AddSecurityEvent(context.Context, *AddSecurityEventRequest) (*AddSecurityEventResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method AddSecurityEvent not implemented")
@@ -646,6 +678,42 @@ func _LogStorageService_GetNewLogs_Handler(srv interface{}, ctx context.Context,
 	return interceptor(ctx, in, info, handler)
 }
 
+func _LogStorageService_AddRule_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(AddRuleRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(LogStorageServiceServer).AddRule(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: LogStorageService_AddRule_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(LogStorageServiceServer).AddRule(ctx, req.(*AddRuleRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _LogStorageService_GetRules_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetRulesRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(LogStorageServiceServer).GetRules(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: LogStorageService_GetRules_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(LogStorageServiceServer).GetRules(ctx, req.(*GetRulesRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _LogStorageService_AddSecurityEvent_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(AddSecurityEventRequest)
 	if err := dec(in); err != nil {
@@ -682,6 +750,14 @@ var LogStorageService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetNewLogs",
 			Handler:    _LogStorageService_GetNewLogs_Handler,
+		},
+		{
+			MethodName: "AddRule",
+			Handler:    _LogStorageService_AddRule_Handler,
+		},
+		{
+			MethodName: "GetRules",
+			Handler:    _LogStorageService_GetRules_Handler,
 		},
 		{
 			MethodName: "AddSecurityEvent",
