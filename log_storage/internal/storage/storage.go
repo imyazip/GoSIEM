@@ -99,6 +99,58 @@ func (s *Storage) AddSecurityEvent(ctx context.Context, event models.SecurityEve
 	return nil
 }
 
+func (s *Storage) GetSecurityEvents(ctx context.Context, limit int32, onlyUnread bool) ([]*pb.SecurityEvent, error) {
+	query := `
+		SELECT id, event_type, event_description, detected_at, read_flag
+		FROM security_events
+	`
+	if onlyUnread {
+		query += " WHERE read_flag = FALSE"
+	}
+	query += " LIMIT ?"
+
+	rows, err := s.db.QueryContext(ctx, query, limit)
+	if err != nil {
+		return nil, fmt.Errorf("failed to query security events: %w", err)
+	}
+	defer rows.Close()
+
+	var events []*pb.SecurityEvent
+	for rows.Next() {
+		var id int64
+		var eventType, eventDescription string
+		var detectedAtRaw []byte
+		var readFlag bool
+
+		// Сканируем значения
+		if err := rows.Scan(&id, &eventType, &eventDescription, &detectedAtRaw, &readFlag); err != nil {
+			return nil, fmt.Errorf("failed to scan security event: %w", err)
+		}
+
+		// Преобразуем `detectedAtRaw` в строку и затем в `time.Time`
+		detectedAtStr := string(detectedAtRaw)
+		detectedAt, err := time.Parse("2006-01-02 15:04:05", detectedAtStr)
+		if err != nil {
+			return nil, fmt.Errorf("failed to parse detected_at: %w", err)
+		}
+
+		// Создаем объект `pb.SecurityEvent`
+		events = append(events, &pb.SecurityEvent{
+			Id:               id,
+			EventType:        eventType,
+			EventDescription: eventDescription,
+			DetectedAt:       timestamppb.New(detectedAt),
+			ReadFlag:         readFlag,
+		})
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("error iterating over rows: %w", err)
+	}
+
+	return events, nil
+}
+
 func (s *Storage) ExecuteMigrations(ctx context.Context, migrationsDir string) error {
 	// Открываем директорию с миграциями
 	files, err := os.ReadDir(migrationsDir)

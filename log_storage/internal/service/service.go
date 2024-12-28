@@ -106,7 +106,6 @@ func (s *LogService) GetNewLogs(ctx context.Context, req *pb.GetNewLogsRequest) 
 
 func (s *LogService) AddSecurityEvent(ctx context.Context, req *pb.AddSecurityEventRequest) (*pb.AddSecurityEventResponse, error) {
 	event := models.SecurityEvent{
-		LogID:            int32(req.LogId),
 		EventType:        req.EventType,
 		EventDescription: req.EventDescription,
 	}
@@ -131,4 +130,32 @@ func (s *LogService) DeleteRule(ctx context.Context, ruleID int64) error {
 
 func (s *LogService) GetRules(ctx context.Context) ([]models.Rule, error) {
 	return s.storage.GetRules(ctx)
+}
+
+// GetSecurityEvents возвращает список событий безопасности
+func (s *LogService) GetSecurityEvents(ctx context.Context, req *pb.GetSecurityEventsRequest) (*pb.GetSecurityEventsResponse, error) {
+	// Преобразуем limit в int32
+	limit := int32(req.Limit)
+
+	// Получаем события из хранилища
+	events, err := s.storage.GetSecurityEvents(ctx, limit, req.OnlyUnread)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get security events: %w", err)
+	}
+
+	// Формируем ответ
+	var responseEvents []*pb.SecurityEvent
+	for _, event := range events {
+		responseEvents = append(responseEvents, &pb.SecurityEvent{
+			Id:               event.Id, // Используем event.Id
+			EventType:        event.EventType,
+			EventDescription: event.EventDescription,
+			DetectedAt:       event.DetectedAt, // Передаем DetectedAt напрямую
+			ReadFlag:         event.ReadFlag,
+		})
+	}
+
+	return &pb.GetSecurityEventsResponse{
+		Events: responseEvents,
+	}, nil
 }

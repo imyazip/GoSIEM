@@ -482,6 +482,7 @@ const (
 	LogStorageService_GetNewLogs_FullMethodName           = "/auth.LogStorageService/GetNewLogs"
 	LogStorageService_AddRule_FullMethodName              = "/auth.LogStorageService/AddRule"
 	LogStorageService_GetRules_FullMethodName             = "/auth.LogStorageService/GetRules"
+	LogStorageService_GetSecurityEvents_FullMethodName    = "/auth.LogStorageService/GetSecurityEvents"
 	LogStorageService_AddSecurityEvent_FullMethodName     = "/auth.LogStorageService/AddSecurityEvent"
 )
 
@@ -494,6 +495,7 @@ type LogStorageServiceClient interface {
 	GetNewLogs(ctx context.Context, in *GetNewLogsRequest, opts ...grpc.CallOption) (*GetNewLogsResponse, error)
 	AddRule(ctx context.Context, in *AddRuleRequest, opts ...grpc.CallOption) (*AddRuleResponse, error)
 	GetRules(ctx context.Context, in *GetRulesRequest, opts ...grpc.CallOption) (*GetRulesResponse, error)
+	GetSecurityEvents(ctx context.Context, in *GetSecurityEventsRequest, opts ...grpc.CallOption) (*GetSecurityEventsResponse, error)
 	AddSecurityEvent(ctx context.Context, in *AddSecurityEventRequest, opts ...grpc.CallOption) (*AddSecurityEventResponse, error)
 }
 
@@ -555,6 +557,16 @@ func (c *logStorageServiceClient) GetRules(ctx context.Context, in *GetRulesRequ
 	return out, nil
 }
 
+func (c *logStorageServiceClient) GetSecurityEvents(ctx context.Context, in *GetSecurityEventsRequest, opts ...grpc.CallOption) (*GetSecurityEventsResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetSecurityEventsResponse)
+	err := c.cc.Invoke(ctx, LogStorageService_GetSecurityEvents_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *logStorageServiceClient) AddSecurityEvent(ctx context.Context, in *AddSecurityEventRequest, opts ...grpc.CallOption) (*AddSecurityEventResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(AddSecurityEventResponse)
@@ -574,6 +586,7 @@ type LogStorageServiceServer interface {
 	GetNewLogs(context.Context, *GetNewLogsRequest) (*GetNewLogsResponse, error)
 	AddRule(context.Context, *AddRuleRequest) (*AddRuleResponse, error)
 	GetRules(context.Context, *GetRulesRequest) (*GetRulesResponse, error)
+	GetSecurityEvents(context.Context, *GetSecurityEventsRequest) (*GetSecurityEventsResponse, error)
 	AddSecurityEvent(context.Context, *AddSecurityEventRequest) (*AddSecurityEventResponse, error)
 	mustEmbedUnimplementedLogStorageServiceServer()
 }
@@ -599,6 +612,9 @@ func (UnimplementedLogStorageServiceServer) AddRule(context.Context, *AddRuleReq
 }
 func (UnimplementedLogStorageServiceServer) GetRules(context.Context, *GetRulesRequest) (*GetRulesResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetRules not implemented")
+}
+func (UnimplementedLogStorageServiceServer) GetSecurityEvents(context.Context, *GetSecurityEventsRequest) (*GetSecurityEventsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetSecurityEvents not implemented")
 }
 func (UnimplementedLogStorageServiceServer) AddSecurityEvent(context.Context, *AddSecurityEventRequest) (*AddSecurityEventResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method AddSecurityEvent not implemented")
@@ -714,6 +730,24 @@ func _LogStorageService_GetRules_Handler(srv interface{}, ctx context.Context, d
 	return interceptor(ctx, in, info, handler)
 }
 
+func _LogStorageService_GetSecurityEvents_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetSecurityEventsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(LogStorageServiceServer).GetSecurityEvents(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: LogStorageService_GetSecurityEvents_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(LogStorageServiceServer).GetSecurityEvents(ctx, req.(*GetSecurityEventsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _LogStorageService_AddSecurityEvent_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(AddSecurityEventRequest)
 	if err := dec(in); err != nil {
@@ -758,6 +792,10 @@ var LogStorageService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetRules",
 			Handler:    _LogStorageService_GetRules_Handler,
+		},
+		{
+			MethodName: "GetSecurityEvents",
+			Handler:    _LogStorageService_GetSecurityEvents_Handler,
 		},
 		{
 			MethodName: "AddSecurityEvent",

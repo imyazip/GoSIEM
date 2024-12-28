@@ -36,13 +36,30 @@ service LogStorageService {
     rpc AddRule (AddRuleRequest) returns (AddRuleResponse);
     rpc GetRules (GetRulesRequest) returns (GetRulesResponse);
 
+    rpc GetSecurityEvents(GetSecurityEventsRequest) returns (GetSecurityEventsResponse);
+
     rpc AddSecurityEvent(AddSecurityEventRequest) returns (AddSecurityEventResponse);
 }
 
 /////////////////////////
 // Запросы и ответы
 /////////////////////////
+message GetSecurityEventsRequest {
+    int32 limit = 1;
+    bool only_unread = 2; // Флаг для фильтрации только непрочитанных событий
+}
 
+message SecurityEvent {
+    int64 id = 1;
+    string event_type = 2;
+    string event_description = 3;
+    google.protobuf.Timestamp detected_at = 4;
+    bool read_flag = 5;
+}
+
+message GetSecurityEventsResponse {
+    repeated SecurityEvent events = 1;
+}
 // Запрос для проверки API-ключа
 message ValidateJWTForSensorRequest {
     string JWT = 1;

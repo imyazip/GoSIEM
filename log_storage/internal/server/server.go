@@ -94,3 +94,7 @@ func (h *LogStorageApi) GetRules(ctx context.Context, req *pb.GetRulesRequest) (
 
 	return &pb.GetRulesResponse{Rules: protoRules}, nil
 }
+
+func (h *LogStorageApi) GetSecurityEvents(ctx context.Context, req *pb.GetSecurityEventsRequest) (*pb.GetSecurityEventsResponse, error) {
+	return h.service.GetSecurityEvents(ctx, req)
+}

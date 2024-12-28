@@ -280,7 +280,51 @@ func viewLogs() {
 
 func viewSecurityEvents() {
 	fmt.Println("\n--- Просмотр событий безопасности ---")
-	// Реализация аналогична другим методам
+
+	fmt.Print("Введите лимит событий для отображения: ")
+	var limit int
+	fmt.Scan(&limit)
+
+	fmt.Print("Показать только непрочитанные события? (1 - Да, 0 - Нет): ")
+	var onlyUnreadInput int
+	fmt.Scan(&onlyUnreadInput)
+	onlyUnread := onlyUnreadInput == 1
+
+	conn, err := grpc.Dial(nginxLogStorageURL, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	if err != nil {
+		fmt.Printf("Ошибка подключения: %v\n", err)
+		return
+	}
+	defer conn.Close()
+
+	client := pb.NewLogStorageServiceClient(conn)
+	ctx := metadata.AppendToOutgoingContext(context.Background(), "authorization", "Bearer "+token)
+
+	req := &pb.GetSecurityEventsRequest{
+		Limit:      int32(limit),
+		OnlyUnread: onlyUnread,
+	}
+
+	resp, err := client.GetSecurityEvents(ctx, req)
+	if err != nil {
+		fmt.Printf("Ошибка получения событий безопасности: %v\n", err)
+		return
+	}
+
+	fmt.Println("\nСобытия безопасности:")
+	if len(resp.Events) == 0 {
+		fmt.Println("Нет событий для отображения.")
+		return
+	}
+
+	for _, event := range resp.Events {
+		fmt.Printf("ID: %d\n", event.Id)
+		fmt.Printf("Тип: %s\n", event.EventType)
+		fmt.Printf("Описание: %s\n", event.EventDescription)
+		fmt.Printf("Обнаружено: %s\n", event.DetectedAt.AsTime().Format(time.RFC1123))
+		fmt.Printf("Прочитано: %t\n", event.ReadFlag)
+		fmt.Println("---")
+	}
 }
 
 func exitApplication() {
