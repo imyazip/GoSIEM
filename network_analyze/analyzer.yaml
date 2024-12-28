@@ -1,0 +1,3 @@
+logServer:
+  host: "localhost"
+  port: 80  
